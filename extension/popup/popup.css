@@ -1,0 +1,12 @@
+:root { color-scheme: light dark; }
+body { width: 360px; margin: 0; padding: 10px 12px; font: 13px/1.4 system-ui, sans-serif; }
+header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+ul { list-style: none; margin: 8px 0; padding: 0; }
+li { border: 1px solid #8884; border-radius: 6px; padding: 8px; margin-bottom: 8px; }
+.title { font-weight: 600; }
+.meta { opacity: .7; font-size: 12px; margin-bottom: 6px; }
+button { margin-right: 6px; padding: 4px 10px; cursor: pointer; }
+.warn { background: #fef3c7; color: #92400e; border: 1px solid #f59e0b; padding: 6px 8px; border-radius: 6px; margin-bottom: 8px; font-weight: 600; }
+.err { color: #dc2626; }
+.ok { color: #16a34a; }
+footer { opacity: .6; font-size: 11px; margin-top: 6px; }
