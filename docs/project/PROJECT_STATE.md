@@ -19,8 +19,13 @@ Dépôt : https://github.com/ngadea34/concours_hunter — `main` = phase 0 ; bra
 | 11 Tests | ✅ | TEST_REPORT.md |
 | 12 Livraison | ✅ | install.ps1 exécuté sur le PC de Nico (Windows 10, Python 3.12) : OK, 33/33 tests, serveur répond |
 
+## Validation réelle sur le PC de Nico (2026-11-20)
+- Installation : `install.ps1 -Dev` OK (Python 3.12), 38/38 tests, serveur répond.
+- Scan Le Démon du Jeu : 128 concours en 108 s, 0 erreur, 0 appel à /toconc.php, ~5 s entre requêtes.
+- Enrichissement de 30 concours : 157 s, 7 règlements récupérés, 2 qualifiés, 125 à vérifier, 1 expiré.
+- Constat : la plupart des concours restent « à vérifier » faute de règlement accessible (beaucoup de concours sur réseaux sociaux sans règlement en ligne). C'est voulu : aucune décision de gratuité/éligibilité sans preuve.
+
 ## Reste à faire
-1. Scan réel LDDJ sur le PC de Nico (connecteur calé sur la structure relevée, à confirmer en conditions réelles).
-2. Trouver d'autres sources autorisées (RSS de médias/marques) : aucune des 3 sources joignables n'a de RSS.
-3. Jeu-concours.biz : seulement avec autorisation écrite d'EKOJEU (démarche de Nico).
-4. Optionnel : notifications e-mail/push (aujourd'hui : notifications dans l'application).
+1. Trouver d'autres sources autorisées (RSS de médias/marques) : aucune des 3 sources joignables n'a de RSS.
+2. Jeu-concours.biz : seulement avec autorisation écrite d'EKOJEU (démarche de Nico).
+3. Optionnel : notifications hors application (e-mail / ntfy), connecteur « pages gagnants ».

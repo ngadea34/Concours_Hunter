@@ -1,10 +1,10 @@
 # Rapport de tests — 2026-11-20
 
-Environnement : conteneur Linux, Python 3.13, Node 22, Chromium (Playwright). **Non encore exécuté sous Windows.**
+Environnements : conteneur Linux (Python 3.13) ; CI GitHub Linux + Windows ; PC de Nico (Windows 10, Python 3.12) : **38/38**.
 
 | Suite | Résultat |
 |---|---|
-| Backend `cd backend && python -m pytest` | **33/33 réussis** (≈5 s) |
+| Backend `cd backend && python -m pytest` | **38/38 réussis** (≈5 s), Linux et Windows |
 | Extension `node --test extension/test/` | **8/8 réussis** (dont e2e Chromium : remplissage, aucun submit) |
 | Frontend `npm run build` (tsc strict + vite) | OK |
 | UI dans Chromium, 9 pages × 2 tailles (1280px, 390px) | 0 erreur console, 0 requête en échec, pas de défilement horizontal |
@@ -31,9 +31,10 @@ Environnement : conteneur Linux, Python 3.13, Node 22, Chromium (Playwright). **
 
 Autres : restauration (test_backup_and_restore), interruption/reprise et arrêt d'urgence (test_scheduler_interruption_recovery), sécurité (test_security_middleware), cache d'analyse et invalidation (test_fees_detected_and_cache_reuse, test_rules_change_invalidates), multilingue (test_multilingual_dates_and_age), participation automatique réelle sur formulaire de démonstration local (test_auto_participation_on_demo_form).
 
+## Test réel
+Scan Le Démon du Jeu + enrichissement sur le PC de Nico : voir PROJECT_STATE.md.
+
 ## Non testé
-- Connecteurs agrégateurs sur les vrais sites (inaccessibles depuis le conteneur).
-- Scripts PowerShell sur Windows.
 - Popup/options de l'extension dans un vrai Chrome (API chrome.* indisponibles en test).
 - Appels Ollama réels (client testé par la validation des sorties, pas avec un modèle).
 - Performance à grand volume (> 10 000 concours) : non mesurée.
