@@ -68,10 +68,18 @@ def _m003_fix_site_contests(conn: Connection) -> None:
     _classify_existing(conn, only_missing=False)
 
 
+def _m004_weekly(conn: Connection) -> None:
+    """M15 Hunter Weekly Command et suivi minimal des promotions (M14) : nouvelles tables uniquement."""
+    names = ["promotions", "weekly_preferences", "weekly_plans", "weekly_plan_items", "weekly_results", "weekly_reports",
+             "weekly_tasks", "weekly_task_history", "weekly_notifications"]
+    Base.metadata.create_all(conn, tables=[Base.metadata.tables[n] for n in names])
+
+
 MIGRATIONS: list[tuple[int, str, Callable[[Connection], None]]] = [
     (1, "schéma initial", _m001_initial),
     (2, "type de jeu (tirage, instant gagnant, quiz...)", _m002_game_type),
     (3, "corrections du premier essai des sites d'organisateurs", _m003_fix_site_contests),
+    (4, "programme de la semaine (M15) et suivi des promotions", _m004_weekly),
 ]
 
 LATEST = MIGRATIONS[-1][0]

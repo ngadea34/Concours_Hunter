@@ -5,6 +5,7 @@ import { useI18n, type Lang } from '../i18n';
 
 const items = [
   { to: '/', key: 'nav.dashboard', icon: '▦', end: true },
+  { to: '/week', key: 'nav.week', icon: '◷' },
   { to: '/catalog', key: 'nav.catalog', icon: '☰' },
   { to: '/review', key: 'nav.review', icon: '?' },
   { to: '/participations', key: 'nav.participations', icon: '✎' },

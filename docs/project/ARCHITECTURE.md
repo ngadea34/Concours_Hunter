@@ -11,6 +11,7 @@ extension MV3 ──localhost + jeton──────────────�
                                                        ├─ rewards/      M05 résultats, gains, réclamations, anti-phishing
                                                        ├─ notifications/M09
                                                        ├─ scheduler/    M10 APScheduler, quotas, arrêt d'urgence
+                                                       ├─ weekly/       M15 programme de la semaine
                                                        ├─ analytics/    M08
                                                        ├─ security/     M07 chiffrement, jeton, assainissement
                                                        ├─ admin/        M12 sauvegarde, restauration, diagnostic
@@ -28,10 +29,18 @@ extension MV3 ──localhost + jeton──────────────�
 - **Accès** : écoute `127.0.0.1` par défaut ; mode LAN (smartphone) activable, protégé par jeton.
 
 ## Modèle de données (M03)
-Tables : contests, organizers, sources, source_connectors, contest_rules, eligibility, prizes, answers, participations, participation_proofs, results, claims, user_profile, consents, browser_sessions, automation_policies, scan_jobs, notifications, audit_logs, settings, schema_version.
+Tables : contests, organizers, sources, source_connectors, contest_rules, eligibility, prizes, answers, participations, participation_proofs, results, claims, user_profile, consents, browser_sessions, automation_policies, scan_jobs, notifications, audit_logs, settings, schema_version ; M15 (migration v4) : weekly_preferences, weekly_plans, weekly_plan_items, weekly_results, weekly_tasks, weekly_task_history, weekly_notifications, weekly_reports, promotions.
 Voir `backend/app/db/models.py`.
 
 ## Scores (Partie VI)
 - Fiabilité /100 : organisateur identifié (15), règlement présent (20), gratuité vérifiée (20), éligibilité FR vérifiée (20), dates cohérentes (10), lots cohérents (5), source sûre HTTPS/réputation (10).
 - Intérêt /100 : valeur du lot (30), intérêt personnel par catégorie (20), temps estimé (15), nombre de gagnants (15), complexité (10), absence de frais (5), livraison FR (5).
 - Jamais présentés comme probabilité de gain.
+
+## Programme de la semaine (M15)
+- **Candidats prioritaires** : qualifié ou participé, gratuit (ou voie gratuite), éligible FR, non clos, fiabilité ≥ 60, intérêt ≥ 40 (réglables), règlement officiel présent, pas déjà joué sur la période.
+- **Score** : 0,5·intérêt + 0,25·fiabilité + urgence (15/10/5) + 1,5·intérêt personnel + 8 si favori − pénalité de temps − complexité. Priorité haute ≥ 65, moyenne ≥ 45.
+- **Planification** : sélection par score dans la capacité (minutes/jour × jours actifs) et l'objectif hebdomadaire, puis répartition au plus tôt (échéance la plus proche d'abord). Jamais complétée avec des concours peu intéressants.
+- **Décisions reportées d'une semaine à l'autre** : refusé reste refusé, reporté revient à sa date, favori conservé.
+- **Tâches** : générées avec une clé unique (`auto_key`) depuis les participations acceptées, les opportunités suivies, les résultats, les réclamations et les promotions ; échéance recalculée sur les données réelles sauf si l'utilisateur l'a modifiée ; expiration automatique.
+- **Notifications** : clé de dédoublonnage incluant la date de clôture (une date modifiée → nouveau rappel). Alertes urgentes immédiates ; rappels non urgents groupés dans la synthèse quotidienne.

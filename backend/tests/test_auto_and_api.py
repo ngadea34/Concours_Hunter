@@ -159,7 +159,7 @@ def test_scheduler_interruption_recovery(env, db):
         db.expire_all()
         assert db.query(ScanJob).one().status == "interrupted"
         st = r.status()
-        assert st["running"] and {j["id"] for j in st["jobs"]} == {"scan", "daily", "auto", "backup"}
+        assert st["running"] and {j["id"] for j in st["jobs"]} == {"scan", "daily", "weekly", "auto", "backup"}
         r.stop_all()
         assert r.status()["paused"]
         r._wrap("daily", lambda: (_ for _ in ()).throw(RuntimeError("ne doit pas tourner")))  # en pause : ignoré

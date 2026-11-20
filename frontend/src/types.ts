@@ -104,3 +104,54 @@ export interface ContestQuery {
   q?: string; status?: string; category?: string; game_type?: string; free_status?: string; fr_eligible?: string;
   closing_within_days?: number; min_reliability?: number; sort?: string; page?: number; page_size?: number;
 }
+
+// ---------------------------------------------------------------- M15 programme de la semaine
+export type Priority = 'high' | 'medium' | 'low';
+export interface WeekContest {
+  contest_id: number; title: string; url: string; organizer: string | null; prize: string | null; value_eur: number | null;
+  end_date: string | null; end_date_verified: boolean; start_date: string | null; days_left: number | null; hours_left: number | null;
+  est_minutes: number; status: string; game_type: string | null; reliability: number | null; interest: number | null;
+  conditions: string[]; participated_this_period: boolean; period: string;
+}
+export interface WeekItem extends WeekContest {
+  item_id: number; priority: Priority; score: number; reasons: string[];
+  decision: 'proposed' | 'accepted' | 'refused' | 'postponed' | 'done' | 'obsolete';
+  favorite: boolean; scheduled_day: string | null; postponed_to: string | null; participation_id: number | null;
+}
+export interface WeekOpportunity extends WeekContest { why: string[]; followed: boolean }
+export type ResultStatus = 'draw_pending' | 'drawn' | 'not_published' | 'published' | 'winner' | 'not_winner' | 'unverifiable';
+export interface WeekResult {
+  id: number; contest_id: number; title: string; organizer: string | null; draw_date: string | null; draw_date_estimated: boolean;
+  publish_date: string | null; prizes_count: number | null; verify_url: string | null; status: ResultStatus;
+  last_checked_at: string | null; note: string | null; participation_status: string;
+}
+export type TaskStatus = 'todo' | 'in_progress' | 'waiting' | 'done' | 'cancelled' | 'expired';
+export interface WeekTask {
+  id: number; title: string; description: string | null; priority: Priority; due_at: string | null; status: TaskStatus;
+  action: string; contest_id: number | null; contest_title: string | null; claim_id: number | null; promotion_id: number | null;
+  proof_note: string | null; auto: boolean;
+}
+export interface PromoBrief {
+  id: number | null; title: string; brand?: string | null; kind: string; url: string | null; product?: string | null; status: string;
+  price_eur?: number | null; refund_eur?: number | null; refund_received_eur?: number | null; net_cost_forecast_eur?: number | null;
+  end_date: string | null; send_deadline?: string | null; days_left?: number | null; contest_id: number | null; note?: string;
+}
+export interface ShopSection {
+  categories: Record<'full_refund' | 'partial_refund' | 'purchase_game' | 'ending' | 'to_send' | 'awaiting_refund' | 'received' | 'to_buy_this_week', PromoBrief[]>;
+  totals: { planned_spend_eur: number; conditional_refunds_eur: number; net_cost_forecast_eur: number; refunds_awaiting_eur: number; refunds_received_eur: number };
+  note: string;
+}
+export interface WeekView {
+  week_start: string; week_end: string; label: string; today: string; timezone: string; is_past: boolean; is_current: boolean;
+  plan: { generated_at: string | null; capacity_minutes: number; planned_minutes: number; weekly_goal: number; minutes_per_day: number };
+  kpis: Record<'priority' | 'done' | 'closing' | 'results_expected' | 'results_published' | 'gains_to_claim' | 'promotions' | 'refund_files', number>;
+  priority: WeekItem[]; results: WeekResult[]; last_chances: Record<'h24' | 'h48' | 'd7' | 'd14', WeekContest[]>;
+  opportunities: WeekOpportunity[]; shop: ShopSection; tasks: WeekTask[];
+}
+export interface WeekPrefs {
+  timezone: string; plan_weekday: number; plan_hour: number; review_weekday: number; review_hour: number; daily_enabled: boolean;
+  daily_hour: number; notifications_enabled: boolean; remind_close_hours: number; alert_close_hours: number; remind_results: boolean;
+  remind_claims: boolean; minutes_per_day: number; active_days: number[]; weekly_goal: number; min_interest: number; min_reliability: number;
+}
+export interface WeekReport { id: number; kind: 'weekly' | 'daily' | 'review'; period_start: string; period_end: string; generated_at: string; text?: string }
+export interface TaskHistory { at: string; field: string; old: string | null; new: string | null; actor: string }

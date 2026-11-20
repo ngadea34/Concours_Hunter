@@ -22,6 +22,8 @@ def main(argv: list[str] | None = None) -> int:
     en.add_argument("limit", type=int, nargs="?", default=20)
     sc = sub.add_parser("scan", help="scanne une source par id")
     sc.add_argument("source_id", type=int)
+    hw = sub.add_parser("hunter-week", help="programme de la semaine : plan, results, deadlines, opportunities, tasks, report, next, settings")
+    hw.add_argument("args", nargs="*")
     a = ap.parse_args(argv)
 
     from .db.migrations import migrate
@@ -39,6 +41,15 @@ def main(argv: list[str] | None = None) -> int:
 
     if a.cmd == "migrate":
         print("OK")
+    elif a.cmd == "hunter-week":
+        from .weekly.commands import run as run_week
+
+        with session_scope() as db:
+            try:
+                print(run_week(db, " ".join(a.args))["text"])
+            except ValueError as e:
+                print(e)
+                return 2
     elif a.cmd == "backup":
         print(json.dumps(bk.create_backup(label="cli")))
     elif a.cmd == "restore":
