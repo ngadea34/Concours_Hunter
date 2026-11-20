@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Formulaire de test</title></head>
+<body>
+<h1>Jeu concours factice (FR/EN/ES/DE/IT/PT/NL)</h1>
+<form id="f" action="/should-never-be-submitted" method="post">
+  <label for="a1">Prénom *</label><input id="a1" name="x1" required>
+  <label>Nom de famille <input name="x2" required></label>
+  <input name="mail" type="email" placeholder="Votre adresse e-mail" required>
+  <input name="phone" type="tel" aria-label="Téléphone mobile">
+  <label for="dob">Fecha de nacimiento</label><input id="dob" name="dob" type="date">
+  <input name="strasse" placeholder="Straße und Hausnummer">
+  <input name="cap" placeholder="Codice postale (CAP)">
+  <input id="stad" name="stad" placeholder="Woonplaats">
+  <label for="c">Pays</label>
+  <select id="c" name="c" required><option value="">--</option><option value="DE">Allemagne</option><option value="FR">France</option></select>
+  <label for="q">Quelle est la capitale de la France ?</label><input id="q" name="q9" required>
+  <label for="z">Champ requis inconnu</label><input id="z" name="zzz" required>
+  <input type="password" name="pwd" placeholder="Mot de passe">
+  <input type="file" name="doc">
+  <label><input type="checkbox" name="newsletter"> J'accepte de recevoir la newsletter</label>
+  <label><input type="checkbox" name="cgu" required> J'accepte le règlement (CGU)</label>
+  <div class="g-recaptcha" data-sitekey="fake"><iframe title="reCAPTCHA" src="https://www.google.com/recaptcha/api2/anchor?k=fake"></iframe></div>
+  <button type="submit" id="send">Participer</button>
+</form>
+<script>
+  window.__submitCount = 0;
+  document.getElementById('f').addEventListener('submit', function (e) { window.__submitCount++; e.preventDefault(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Concours Hunter</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font: 14px system-ui, sans-serif; max-width: 480px; margin: 24px auto; padding: 0 16px; }
+    label { display: block; margin: 12px 0 4px; }
+    input { width: 100%; padding: 6px; box-sizing: border-box; }
+    button { margin: 12px 8px 0 0; padding: 6px 14px; }
+    #msg { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1 data-i18n="optionsTitle"></h1>
+  <label for="url" data-i18n="serverUrl"></label>
+  <input id="url" type="url" placeholder="http://127.0.0.1:8765">
+  <label for="token" data-i18n="token"></label>
+  <input id="token" type="password" autocomplete="off">
+  <button id="save" data-i18n="save"></button><button id="test" data-i18n="test"></button>
+  <div id="msg" role="status"></div>
+  <script type="module" src="options.js"></script>
+</body>
+</html>
