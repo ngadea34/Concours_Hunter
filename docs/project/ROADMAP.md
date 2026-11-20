@@ -10,4 +10,5 @@
 - [x] v0.2 Agrégateur maison (sites d'organisateurs, suggestions, type de jeu)
 - [x] v0.3 M15 Programme de la semaine
 - [x] v0.4 Révision de la politique de sources : 7 catégories, audit des 4 agrégateurs (A à J), matrice d'autorisation, consultation assistée + lien direct, indices d'automatisabilité A1 à A8 et de difficulté, filtres utilisateur
-- [ ] M14 Shop & Promo : promotions, offres de remboursement, documents + OCR, gestionnaire de remboursements, registre des dépenses, `/hunter-shop`
+- [x] v0.5 M14 Shop & Promo : analyse d'offres, rentabilité A/B/C, EAN, disponibilité 4 niveaux, justificatifs chiffrés + OCR, dossiers en 12 contrôles avec validation, registre des dépenses et plafond, `/hunter-shop`
+- [ ] M14 suite : lecture de sites d'offres de remboursement réels (sources `promo_site` à ajouter et valider sur le PC), import de tickets par l'extension

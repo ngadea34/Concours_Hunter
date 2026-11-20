@@ -134,3 +134,25 @@ Page<T> { items:T[]; total:number; page:number; page_size:number }
 
 Source : champ `access_mode`. Concours : `automation_class`, `difficulty`, `social_platform`. Préférences hebdo : `automation_mode` (max, mixed, manual), `hide_facebook`, `hide_instagram`, `hide_creative`, `favor_quick_forms`, `favor_instant_win`, `favor_quiz`, `favor_many_prizes`, `social_share_max`.
 
+### Hunter Shop & Promo (v0.5, M14)
+| Méthode | Route | Corps / paramètres | Réponse |
+|---|---|---|---|
+| GET | /api/shop/dashboard | | rubriques : available, to_buy, full_refund, purchase_games, partial_refund, ending_soon, claims_to_complete, claims_sent, refunds_awaiting, refunds_late, refunds_received, refused, history, excluded |
+| GET | /api/shop/recommendations | `kind?` (liste séparée par des virgules) | `{items[], excluded[], spent_this_month_eur, monthly_cap_eur, note}` |
+| GET/PUT | /api/shop/preferences | ShopPrefs (partiel en PUT) | ShopPrefs |
+| POST | /api/shop/command | `{command:"/hunter-shop discover|available|cashback|contests|analyze <texte>|submit <n°>|track|report [AAAA-MM]"}` | `{tab, text, data}` |
+| POST | /api/shop/discover | | résumé de la recherche |
+| POST | /api/shop/analyze | `{text, url?, title?, save?}` | `{analysis}` ou l'opération créée |
+| GET/PATCH | /api/shop/promotions/{id} | champs modifiables ; statut limité à to_watch, to_buy, ignored, expired | opération (+ documents et dossiers en GET) |
+| POST | /api/shop/promotions/{id}/availability | `{retailer, level, store?, price_eur?, ean?, source?}` ; source obligatoire sauf `unknown` | disponibilité |
+| GET | /api/shop/ean/{ean} | | fiche Open Food Facts (indication) |
+| GET/POST | /api/shop/documents | `promotion_id?` / `{kind, data_url, promotion_id?, claim_id?}` | ShopDoc[] / ShopDoc |
+| POST | /api/shop/documents/{id}/ocr | `{text?}` (sans texte : modèle de vision local) | ShopDoc |
+| PATCH | /api/shop/documents/{id} | retailer, store, purchase_date, ticket_number, total_eur, lines, eans, ean | ShopDoc |
+| GET | /api/shop/documents/{id}/file | `confirm=true` obligatoire pour un document sensible (403 sinon) | copie de travail |
+| GET/POST | /api/shop/claims | `{promotion_id, document_ids?}` | ShopClaim[] / ShopClaim |
+| GET | /api/shop/claims/{id} | | ShopClaim + documents |
+| POST | /api/shop/claims/{id}/{action} | check, attach `{document_id}`, purchase `{amount_eur, date}`, codes `{codes[]}`, preview, validate `{confirm:true, document_ids}`, sent `{sent_on?, confirmation_ref?}`, confirm `{confirmation_ref?, amount_eur?}`, refunded `{amount_eur, received_on}`, refused `{reason}`, cancel | ShopClaim (preview : `{claim, preview}`) ; 400 si une règle bloque |
+| GET | /api/shop/expenses | `month?` (AAAA-MM) | bilan du mois + écritures |
+| GET | /api/shop/expenses/history | | 12 derniers mois |
+| POST | /api/shop/gains | `{amount_eur, date?, note?}` | bilan du mois |

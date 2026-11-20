@@ -174,3 +174,61 @@ export interface SourceQuality {
   last_scans: { status: string; found: number; new: number; error: string | null; finished_at: string | null }[]; issues: string[];
 }
 export interface ImportResult { created: number[]; existing: number[]; skipped: { line: number | null; url: string; reason: string }[] }
+
+// ---------------------------------------------------------------- M14 Shop & Promo
+export type ShopCategory = 'A' | 'B' | 'C';
+export interface ShopFinance {
+  price_eur: number | null; refund_announced_eur: number | null; refund_guaranteed: boolean; conditions: string[];
+  extra_benefits_eur: number | null; extra_counted_eur: number | null; fees_eur: number | null; net_cost_forecast_eur: number | null;
+  refund_delay_days: number | null; random_prize_value_eur: number | null; category: ShopCategory; category_label: string;
+  notes: string[]; disclaimer: string;
+}
+export interface ShopObservation {
+  retailer: string; store: string | null; level: string; price_eur: number | null; ean: string | null; source: string | null; observed_at: string | null;
+}
+export interface ShopAvailability { level: string; text: string; observations: ShopObservation[]; realtime_note: string }
+export interface ShopOffer {
+  id: number; title: string; brand: string | null; product: string | null; kind: string; status: string; url: string | null;
+  rules_url: string | null; origin: string | null; contest_id: number | null; retailers: string[]; retailers_note: string | null;
+  eans: string[]; ean_status: string; variant: Record<string, string>; price_eur: number | null; finance: ShopFinance;
+  category: ShopCategory; reliability: number | null; required_docs: string[]; end_date: string | null; send_deadline: string | null;
+  days_left: number | null; availability: ShopAvailability; action: string; claim_id: number | null; warnings: string[];
+  evidence: Record<string, string>; over_cap?: boolean;
+}
+export interface ShopCheck { step: number; label: string; status: 'ok' | 'warn' | 'fail' | 'pending' | 'na'; detail: string }
+export interface ShopClaim {
+  id: number; promotion_id: number; promotion_title: string; kind: 'refund' | 'purchase_game'; status: string; late: boolean;
+  purchase_date: string | null; retailer: string | null; ticket_number: string | null; amount_paid_eur: number | null;
+  amount_requested_eur: number | null; amount_confirmed_eur: number | null; amount_received_eur: number | null;
+  received_date: string | null; codes: string[] | null; checks: ShopCheck[] | null; validated_at: string | null; sent_at: string | null;
+  confirmation_ref: string | null; refusal_reason: string | null; participation_id: number | null;
+  history: { at: string; event: string; detail: string | null }[] | null; channel: string | null; channel_target: string | null;
+  documents?: ShopDoc[];
+}
+export interface ShopDoc {
+  id: number; kind: string; promotion_id: number | null; claim_id: number | null; sha256: string; mime: string; size: number;
+  sensitive: boolean; ocr_method: string | null; ocr_text: string | null; readability: string | null;
+  extracted: Record<string, unknown> | null; user_fields: Record<string, unknown> | null; fields: Record<string, unknown>; created_at: string;
+}
+export interface ShopRefusedRow { id?: number; promotion_id: number; promotion_title: string; status: string; late?: boolean; refusal_reason?: string | null }
+export interface ShopDashboard {
+  available: ShopOffer[]; to_buy: ShopOffer[]; full_refund: ShopOffer[]; purchase_games: ShopOffer[]; partial_refund: ShopOffer[];
+  ending_soon: ShopOffer[]; claims_to_complete: ShopClaim[]; claims_sent: ShopClaim[]; refunds_awaiting: ShopClaim[];
+  refunds_late: ShopClaim[]; refunds_received: ShopClaim[]; refused: ShopRefusedRow[]; history: ShopClaim[];
+  excluded: { id: number; title: string; reason: string }[]; realtime_note: string;
+}
+export interface ShopPreview {
+  claim_id: number; channel: string | null; channel_target: string | null; channel_status: string; channel_detail: string;
+  documents: { id: number; kind: string; sensitive: boolean; size: number }[]; personal_data: string[]; physical_items: string[];
+  codes: string[] | null; amount_requested_eur: number | null; warning: string;
+}
+export interface ShopPrefs {
+  retailers: string[]; stores: { retailer: string; name: string }[]; postal_code: string; radius_km: number; categories: string[];
+  max_price_eur: number; monthly_cap_eur: number; accepted_products: string[]; refused_products: string[]; min_category: ShopCategory;
+}
+export interface ShopMonth {
+  month: string; expenses_eur: number; savings_realized_eur: number; refunds_pending_eur: number; refunds_refused_eur: number;
+  random_gains_eur: number; net_real_cost_eur: number; monthly_cap_eur: number; cap_left_eur: number; note: string;
+  entries?: { at: string; kind: string; amount_eur: number; promotion_id: number | null; claim_id: number | null; note: string | null }[];
+}
+export interface ShopCommandResult { tab: string; text: string; data: unknown }

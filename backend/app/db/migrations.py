@@ -102,12 +102,27 @@ def _m005_automatability(conn: Connection) -> None:
                      {"a": r["class"], "d": r["difficulty"], "p": r["platform"], "i": cid})
 
 
+def _m006_shop(conn: Connection) -> None:
+    """M14 Shop & Promo : conditions détaillées des promotions + disponibilités, documents, dossiers, registre."""
+    from ..db.models import Promotion
+
+    cols = {r[1] for r in conn.execute(text("PRAGMA table_info(promotions)"))}
+    for col in Promotion.__table__.columns:
+        if col.name not in cols:
+            typ = col.type.compile(dialect=conn.dialect)
+            default = " DEFAULT '[]'" if typ == "JSON" and col.name in ("retailers", "eans", "required_docs") else (
+                " DEFAULT '{}'" if typ == "JSON" else "")
+            conn.execute(text(f"ALTER TABLE promotions ADD COLUMN {col.name} {typ}{default}"))
+    Base.metadata.create_all(conn, tables=[Base.metadata.tables[n] for n in ("shop_claims", "promo_availability", "shop_documents", "shop_ledger")])
+
+
 MIGRATIONS: list[tuple[int, str, Callable[[Connection], None]]] = [
     (1, "schéma initial", _m001_initial),
     (2, "type de jeu (tirage, instant gagnant, quiz...)", _m002_game_type),
     (3, "corrections du premier essai des sites d'organisateurs", _m003_fix_site_contests),
     (4, "programme de la semaine (M15) et suivi des promotions", _m004_weekly),
     (5, "indice d'automatisabilité A1 à A8 et difficulté", _m005_automatability),
+    (6, "Shop & Promo (M14) : conditions, disponibilités, justificatifs, dossiers, dépenses", _m006_shop),
 ]
 
 LATEST = MIGRATIONS[-1][0]

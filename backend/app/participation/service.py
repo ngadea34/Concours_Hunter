@@ -37,13 +37,17 @@ def period_key(period: str | None, today: date | None = None) -> str:
     return "once"
 
 
-def prepare(db: Session, contest: Contest, requested_mode: str | None = None) -> Participation:
-    if contest.status in ("rejected", "expired", "archived"):
+def prepare(db: Session, contest: Contest, requested_mode: str | None = None, purchase_flow: bool = False) -> Participation:
+    """purchase_flow : parcours « jeu avec achat » de M14 (achat fait par l'utilisateur, dossier validé par lui) ; toujours manuel."""
+    purchase_ok = purchase_flow and contest.free_status == "purchase_required"
+    if contest.status in ("expired", "archived") or (contest.status == "rejected" and not purchase_ok):
         raise ParticipationError(f"Participation impossible : concours {contest.status}")
     if contest.end_date and contest.end_date < date.today():
         raise ParticipationError("Concours clôturé")
-    if contest.free_status == "purchase_required":
+    if contest.free_status == "purchase_required" and not purchase_ok:
         raise ParticipationError("Achat obligatoire : participation refusée")
+    if purchase_ok:
+        requested_mode = "manual"
     period = contest.policy.period if contest.policy else "once"
     key = period_key(period)
     dup = db.scalars(select(Participation).where(Participation.contest_id == contest.id, Participation.period_key == key,

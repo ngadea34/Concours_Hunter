@@ -13,6 +13,7 @@ DEFAULTS: dict = {
     "ollama_url": "http://127.0.0.1:11434",
     "llm_model_small": "qwen3.5:4b",
     "llm_model_large": "qwen3:8b",
+    "llm_model_vision": "qwen2.5vl:7b",  # lecture des tickets de caisse (OCR local, optionnel)
     "scan_interval_minutes": 180,
     "max_requests_per_domain_per_hour": 30,
     "interest_categories": {c: 5 for c in CATEGORIES},

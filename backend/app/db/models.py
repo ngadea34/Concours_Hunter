@@ -359,6 +359,108 @@ class Promotion(Base, TimestampMixin):
     sent_date: Mapped[date | None] = mapped_column(Date)
     received_date: Mapped[date | None] = mapped_column(Date)
     notes: Mapped[str | None] = mapped_column(Text)
+    # --- M14 Shop & Promo (migration v6) : règlement et conditions exactes de l'opération
+    origin: Mapped[str | None] = mapped_column(String(20))  # user | discovery | contest
+    rules_url: Mapped[str | None] = mapped_column(String(1000))
+    rules_text: Mapped[str | None] = mapped_column(Text)
+    retailers: Mapped[list[Any]] = mapped_column(default=list)  # enseignes participantes ; [] = non précisé
+    eans: Mapped[list[Any]] = mapped_column(default=list)  # codes EAN exacts concernés
+    variant: Mapped[dict[str, Any]] = mapped_column(default=dict)  # format, quantité, parfum, édition, min_quantity
+    purchase_start: Mapped[date | None] = mapped_column(Date)
+    request_start: Mapped[date | None] = mapped_column(Date)
+    request_delay_days: Mapped[int | None] = mapped_column(Integer)  # « dans les N jours suivant l'achat »
+    refund_percent: Mapped[float | None] = mapped_column(Float)
+    refund_max_eur: Mapped[float | None] = mapped_column(Float)
+    limit_per: Mapped[str | None] = mapped_column(String(20))  # person | household | product | ticket
+    limit_count: Mapped[int | None] = mapped_column(Integer)
+    cumulable: Mapped[bool | None] = mapped_column(Boolean)  # None = non précisé : jamais cumulé
+    extra_benefits_eur: Mapped[float | None] = mapped_column(Float)
+    fees_eur: Mapped[float | None] = mapped_column(Float)
+    prize_value_eur: Mapped[float | None] = mapped_column(Float)  # jeux avec achat : valeur du lot, jamais une économie
+    channel: Mapped[str | None] = mapped_column(String(20))  # form | email | platform | app | postal
+    channel_target: Mapped[str | None] = mapped_column(String(500))  # URL, e-mail ou adresse postale officielle
+    required_docs: Mapped[list[Any]] = mapped_column(default=list)
+    refund_delay_days: Mapped[int | None] = mapped_column(Integer)
+    reliability: Mapped[int | None] = mapped_column(Integer)
+    analysis: Mapped[dict[str, Any]] = mapped_column(default=dict)  # justifications (extraits du règlement)
+    category: Mapped[str | None] = mapped_column(String(30))  # catégorie de produit (alimentaire, hygiène…)
+
+
+class PromoAvailability(Base):
+    """Disponibilité observée d'un produit d'opération. Jamais « en rayon » sans source du magasin."""
+    __tablename__ = "promo_availability"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    promotion_id: Mapped[int] = mapped_column(ForeignKey("promotions.id", ondelete="CASCADE"), index=True)
+    retailer: Mapped[str] = mapped_column(String(60))
+    store: Mapped[str | None] = mapped_column(String(200))
+    ean: Mapped[str | None] = mapped_column(String(14))
+    product_label: Mapped[str | None] = mapped_column(String(300))
+    price_eur: Mapped[float | None] = mapped_column(Float)
+    level: Mapped[str] = mapped_column(String(20), default="unknown")  # store_confirmed | catalog_listed | third_party | unknown
+    source: Mapped[str | None] = mapped_column(String(300))
+    observed_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class ShopDocument(Base):
+    """Justificatif fourni par l'utilisateur. Original chiffré et jamais modifié ; copie de travail distincte."""
+    __tablename__ = "shop_documents"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    promotion_id: Mapped[int | None] = mapped_column(ForeignKey("promotions.id", ondelete="SET NULL"), index=True)
+    claim_id: Mapped[int | None] = mapped_column(ForeignKey("shop_claims.id", ondelete="SET NULL"), index=True)
+    kind: Mapped[str] = mapped_column(String(20))  # receipt | invoice | packaging | barcode | qr | promo_label | payment_proof | rules_capture | other
+    original_path: Mapped[str] = mapped_column(String(500))
+    working_path: Mapped[str] = mapped_column(String(500))
+    sha256: Mapped[str] = mapped_column(String(64), index=True)
+    mime: Mapped[str] = mapped_column(String(50))
+    size: Mapped[int] = mapped_column(Integer)
+    sensitive: Mapped[bool] = mapped_column(Boolean, default=False)  # justificatif de paiement, données bancaires
+    ocr_text: Mapped[str | None] = mapped_column(Text)
+    ocr_method: Mapped[str | None] = mapped_column(String(60))  # ollama:<modèle> | user_text | none
+    extracted: Mapped[dict[str, Any]] = mapped_column(default=dict)  # date, magasin, lignes, total, n° ticket, EAN…
+    readability: Mapped[str] = mapped_column(String(20), default="pending")  # ok | incomplete | unreadable | pending
+    user_fields: Mapped[dict[str, Any]] = mapped_column(default=dict)  # corrections saisies par l'utilisateur (l'original reste intact)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class ShopClaim(Base, TimestampMixin):
+    """Dossier de remboursement ou de jeu avec achat (REIMBURSEMENT MANAGER)."""
+    __tablename__ = "shop_claims"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    promotion_id: Mapped[int] = mapped_column(ForeignKey("promotions.id", ondelete="CASCADE"), index=True)
+    kind: Mapped[str] = mapped_column(String(20), default="refund")  # refund | purchase_game
+    status: Mapped[str] = mapped_column(String(20), default="draft", index=True)
+    # draft | incomplete | ready | awaiting_validation | validated | sent | confirmed | refund_pending | refunded | refused | cancelled
+    purchase_date: Mapped[date | None] = mapped_column(Date)
+    retailer: Mapped[str | None] = mapped_column(String(60))
+    ticket_number: Mapped[str | None] = mapped_column(String(60))
+    amount_paid_eur: Mapped[float | None] = mapped_column(Float)
+    amount_requested_eur: Mapped[float | None] = mapped_column(Float)
+    amount_confirmed_eur: Mapped[float | None] = mapped_column(Float)
+    amount_received_eur: Mapped[float | None] = mapped_column(Float)
+    received_date: Mapped[date | None] = mapped_column(Date)
+    codes: Mapped[list[Any]] = mapped_column(default=list)  # codes à saisir (jeux avec achat, offres à code)
+    checks: Mapped[list[Any]] = mapped_column(default=list)  # 12 contrôles du dossier
+    validated_at: Mapped[datetime | None] = mapped_column(DateTime)  # validation explicite avant transmission
+    validated_docs: Mapped[list[Any]] = mapped_column(default=list)  # documents dont la transmission est validée
+    sent_at: Mapped[datetime | None] = mapped_column(DateTime)
+    channel: Mapped[str | None] = mapped_column(String(20))
+    confirmation_ref: Mapped[str | None] = mapped_column(String(200))
+    refusal_reason: Mapped[str | None] = mapped_column(Text)
+    participation_id: Mapped[int | None] = mapped_column(ForeignKey("participations.id", ondelete="SET NULL"))
+    history: Mapped[list[Any]] = mapped_column(default=list)
+    promotion: Mapped[Promotion] = relationship()
+
+
+class ShopLedger(Base):
+    """Registre des opérations financières (dépenses, remboursements, gains aléatoires)."""
+    __tablename__ = "shop_ledger"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    at: Mapped[date] = mapped_column(Date, index=True)
+    kind: Mapped[str] = mapped_column(String(20))  # expense | refund_requested | refund_confirmed | refund_received | refund_refused | random_gain
+    amount_eur: Mapped[float] = mapped_column(Float)
+    promotion_id: Mapped[int | None] = mapped_column(ForeignKey("promotions.id", ondelete="SET NULL"))
+    claim_id: Mapped[int | None] = mapped_column(ForeignKey("shop_claims.id", ondelete="SET NULL"))
+    note: Mapped[str | None] = mapped_column(String(300))
 
 
 # ---------------------------------------------------------------- M15 : Hunter Weekly Command

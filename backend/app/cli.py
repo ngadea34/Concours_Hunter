@@ -24,6 +24,8 @@ def main(argv: list[str] | None = None) -> int:
     sc.add_argument("source_id", type=int)
     hw = sub.add_parser("hunter-week", help="programme de la semaine : plan, results, deadlines, opportunities, tasks, report, next, settings")
     hw.add_argument("args", nargs="*")
+    hs = sub.add_parser("hunter-shop", help="Shop & Promo : discover, available, cashback, contests, analyze, submit, track, report")
+    hs.add_argument("args", nargs="*")
     a = ap.parse_args(argv)
 
     from .db.migrations import migrate
@@ -50,6 +52,11 @@ def main(argv: list[str] | None = None) -> int:
             except ValueError as e:
                 print(e)
                 return 2
+    elif a.cmd == "hunter-shop":
+        from .shop.commands import run as run_shop
+
+        with session_scope() as db:
+            print(run_shop(db, " ".join(a.args))["text"])
     elif a.cmd == "backup":
         print(json.dumps(bk.create_backup(label="cli")))
     elif a.cmd == "restore":

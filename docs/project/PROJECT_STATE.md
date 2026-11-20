@@ -1,9 +1,9 @@
 # État du projet — à relire en premier après une interruption
 
 Dernière mise à jour : 2026-11-20 (UTC)
-Dépôt : https://github.com/ngadea34/concours_hunter — `main` = v0.2.1 (PR #1 à #6 fusionnées) ; branche `programme-semaine` = v0.3.0 (M15, PR #7) ; branche `politique-sources` = v0.4.0 (politique de sources, basée sur programme-semaine).
+Dépôt : https://github.com/ngadea34/concours_hunter — `main` = v0.2.1 (PR #1 à #6 fusionnées) ; branche `programme-semaine` = v0.3.0 (M15, PR #7) ; branche `politique-sources` = v0.4.0 (politique de sources, PR #8) ; branche `shop-promo` = v0.5.0 (M14, basée sur politique-sources).
 
-Ordre des directives de Nico (2026-11-20) : 1) M15 Programme de la semaine (fait, v0.3.0) ; 2) révision de la politique de sources (fait, v0.4.0) ; 3) M14 Shop & Promo.
+Ordre des directives de Nico (2026-11-20) : 1) M15 Programme de la semaine (fait, v0.3.0) ; 2) révision de la politique de sources (fait, v0.4.0) ; 3) M14 Shop & Promo (fait, v0.5.0).
 
 | Phase | Statut | Preuve |
 |---|---|---|
@@ -13,7 +13,7 @@ Ordre des directives de Nico (2026-11-20) : 1) M15 Programme de la semaine (fait
 | 3 Découverte | ✅ (fixtures) | RSS, HTML générique, dédup, provenance — tests `test_discovery.py` |
 | 4 Agrégateurs | ✅ revu (v0.4) | Audit A à J du 2026-11-20 (AUDIT_AGREGATEURS.md) : Jeu-concours.biz, ToutGagner, Concours du Net en consultation assistée (accord écrit pour lever, Réglages) ; LDDJ lu automatiquement par décision de Nico (D18) malgré le même réseau que Jeu-concours.biz. Aucun RSS ni API |
 | 5 Intelligence | ✅ | règles R0 7 langues + Ollama R1/R2 optionnel avec citations vérifiées |
-| 6 Frontend | ✅ | 9 pages, vérifiées dans Chromium (bureau 1280px + mobile 390px, 0 erreur console) |
+| 6 Frontend | ✅ | 11 pages (dont Ma semaine et Shop & Promo), vérifiées dans Chromium (bureau 1280px + mobile 390px, 0 erreur console) |
 | 7 Participation | ✅ | semi/manuel + auto encadré, testé sur formulaire de démo local (Playwright) |
 | 8 Gains | ✅ | cycle gain → réclamation → reçu testé ; anti-phishing |
 | 9 Automatisation | ✅ | APScheduler, quotas, verrou, reprise, arrêt d'urgence |
@@ -53,8 +53,16 @@ Ordre des directives de Nico (2026-11-20) : 1) M15 Programme de la semaine (fait
 - Classement M15 : bonus A1 +6, A2 +5, A3 +2, A4 −3, A5/A6 −6 ; A7/A8 exclus ; part A4 plafonnée (`social_share_max`) ; filtres dans les préférences hebdo.
 - Scheduler : chaque source isolée (try/except) ; un domaine en consultation assistée n'est jamais scanné.
 
+## Hunter Shop & Promo (M14, v0.5.0)
+- Code : `backend/app/shop/` (products, analyze, finance, prefs, documents, claims, ledger, recommend, off, discover, commands), routes `api/shop_routes.py` (/api/shop/*), connecteur `promo_site`, page `frontend/src/pages/Shop.tsx`, CLI `python -m app.cli hunter-shop …`.
+- Migration v6 : colonnes M14 de `promotions` + tables `promo_availability`, `shop_documents`, `shop_claims`, `shop_ledger`.
+- Déterministe (aucun LLM), sauf lecture optionnelle des justificatifs par le modèle de vision local (`llm_model_vision`, Ollama).
+- Garde-fous : aucun achat ni envoi par l'application ; validation explicite avant toute transmission ; canal non vérifié = validation impossible ; « remboursé » seulement constaté ; lot jamais déduit du coût ; avantages non cumulables jamais additionnés ; jamais « en rayon » sans source magasin ; justificatif original jamais modifié.
+- Job quotidien : jeux avec achat repris des concours, opérations expirées, alerte de remboursement en retard (sans doublon).
+- 21 tests `test_shop.py` couvrent les 15 cas obligatoires de la directive ; parcours UI vérifié dans Chromium (1280 et 390 px).
+
 ## Reste à faire
-0. M14 Shop & Promo (voir ROADMAP). Demandes d'accord écrit (Reflexe Media pour Jeu-concours.biz, ToutGagner, Concours du Net) : démarche de Nico, contacts dans AUDIT_AGREGATEURS.md.
+0. Demandes d'accord écrit (Reflexe Media pour Jeu-concours.biz, ToutGagner, Concours du Net) : démarche de Nico, contacts dans AUDIT_AGREGATEURS.md.
 1. Faire grandir l'agrégateur maison : suivre les sites suggérés (Sources), et en ajouter à la main.
 2. Jeu-concours.biz : seulement avec autorisation écrite d'EKOJEU (démarche de Nico).
 3. Optionnel : notifications hors application (e-mail / ntfy), connecteur « pages gagnants ».

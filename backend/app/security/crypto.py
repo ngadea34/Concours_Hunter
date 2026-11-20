@@ -52,3 +52,14 @@ def get_api_token() -> str:
         p.write_text(secrets.token_urlsafe(32), encoding="utf-8")
         _restrict(p)
     return p.read_text(encoding="utf-8").strip()
+
+
+def encrypt_bytes(raw: bytes) -> bytes:
+    return _fernet().encrypt(raw)
+
+
+def decrypt_bytes(token: bytes) -> bytes:
+    try:
+        return _fernet().decrypt(token)
+    except InvalidToken as e:
+        raise ValueError("Impossible de déchiffrer le document (clé data/secret.key différente ?)") from e
