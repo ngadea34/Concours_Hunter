@@ -12,6 +12,7 @@ from fastapi.staticfiles import StaticFiles
 
 from . import __version__
 from .api.routes import router
+from .api.shop_routes import router as shop_router
 from .api.weekly_routes import router as weekly_router
 from .config import get_settings
 from .db.migrations import migrate
@@ -80,6 +81,7 @@ def create_app() -> FastAPI:
 
     app.include_router(router)
     app.include_router(weekly_router)
+    app.include_router(shop_router)
 
     if (STATIC / "assets").exists():
         app.mount("/assets", StaticFiles(directory=STATIC / "assets"), name="assets")

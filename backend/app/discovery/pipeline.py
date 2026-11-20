@@ -188,6 +188,10 @@ def enrich(db: Session, fetcher: Fetcher, contest: Contest, raw: RawContest, sou
 
 
 def run_scan(db: Session, source: Source, fetcher: Fetcher | None = None, max_enrich: int | None = None, job: ScanJob | None = None) -> ScanJob:
+    if source.kind == "promo_site":  # M14 : pages d'offres → promotions
+        from ..shop.discover import scan_source
+
+        return scan_source(db, source, fetcher, job)
     settings = get_settings_dict(db)
     own = fetcher is None
     fetcher = fetcher or Fetcher(max_per_hour=settings["max_requests_per_domain_per_hour"])

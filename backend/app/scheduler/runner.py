@@ -80,6 +80,7 @@ class Runner:
                 c.status = "expired"
             # les rappels de clôture sont faits par M15 (préférences : 48 h / 24 h, regroupement des alertes non urgentes)
             check_deadlines(db)
+            self._shop_daily(db, today)
             if not self.paused:
                 from ..participation.profile import get_profile
                 from ..weekly.results import check_result_pages
@@ -89,6 +90,23 @@ class Runner:
                     check_result_pages(db, f, today, get_profile(db))
                 finally:
                     f.close()
+
+    @staticmethod
+    def _shop_daily(db, today: date) -> None:  # noqa: ANN001
+        """M14 : jeux avec achat repérés → opérations ; offres expirées ; remboursements en retard signalés une fois."""
+        from ..db.models import Promotion, ShopClaim
+        from ..notifications.service import notify
+        from ..shop.claims import is_late
+        from ..shop.discover import from_contests
+
+        from_contests(db, today)
+        for p in db.scalars(select(Promotion).where(Promotion.status.in_(("to_watch", "to_buy")), Promotion.end_date < today)):
+            p.status = "expired"
+        for c in db.scalars(select(ShopClaim).where(ShopClaim.status.in_(("sent", "confirmed", "refund_pending")))):
+            if is_late(c, today):
+                notify(db, "claim_deadline", f"Remboursement en retard : {c.promotion.title[:150]}",
+                       "Le délai annoncé est dépassé : relancez l'organisateur par le canal officiel.", dedup_key=f"shop-late:{c.id}")
+        db.commit()
 
     def job_auto(self) -> None:
         from ..participation.browser_runner import run_auto

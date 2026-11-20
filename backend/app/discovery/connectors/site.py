@@ -61,6 +61,12 @@ class SiteConnector(Connector):
     description = "Site d'un organisateur (marque, média, enseigne) : concours trouvés via ses sitemaps, flux RSS et page concours."
     default_config = {"listing_url": None, "max_age_days": 120, "max_items": 40, "max_sitemaps": 4}
 
+    def is_target(self, url: str) -> bool:
+        return is_contest_url(url)
+
+    def title_ok(self, title: str) -> bool:
+        return bool(KEYWORDS.search(title))
+
     def _recent(self, lastmod: str | None) -> bool:
         if not lastmod:
             return True
@@ -100,7 +106,7 @@ class SiteConnector(Connector):
                     continue
                 href = loc.get_text(strip=True)
                 lm = u.find("lastmod")
-                if href.startswith("http") and is_contest_url(href) and self._recent(lm.get_text(strip=True) if lm else None):
+                if href.startswith("http") and self.is_target(href) and self._recent(lm.get_text(strip=True) if lm else None):
                     found.setdefault(href, RawContest(title=title_from_url(href), url=href, source_url=href, detail_url=href,
                                                       language=self.source.language, extra={"title_from_url": True}))
         return list(found.values())
@@ -121,12 +127,12 @@ class SiteConnector(Connector):
                 continue
             for e in feedparser.parse(fr.text).entries[:100]:
                 link, title = e.get("link"), (e.get("title") or "").strip()
-                if link and title and (KEYWORDS.search(title) or is_contest_url(link)):
+                if link and title and (self.title_ok(title) or self.is_target(link)):
                     out.setdefault(link, RawContest(title=title[:500], url=link, source_url=link, detail_url=link, language=self.source.language,
                                                     description=html_to_text(e.get("summary") or "")[:5000]))
         items, _ = HtmlListingConnector(self.source, self.fetcher).parse(res.text, res.url)
         for it in items:
-            if _bare(it.url) == _bare(res.url) and is_contest_url(it.url):
+            if _bare(it.url) == _bare(res.url) and self.is_target(it.url):
                 it.title = CTA_TAIL.sub("", it.title).strip() or it.title
                 out.setdefault(it.url, it)
         return list(out.values())

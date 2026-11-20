@@ -114,7 +114,8 @@ FREE_PATTERNS = [
     r"geen aankoopverplichting", r"deelname is gratis", r"gratis deelname",
 ]
 PAID_PATTERNS = [
-    r"achat (est )?obligatoire", r"preuve d.?achat", r"ticket de caisse", r"code[- ]barres?", r"code (unique )?(figurant|present) sur",
+    r"achat (est )?obligatoire", r"obligation d.?achat", r"preuve d.?achat",
+    r"code (unique )?(sous|dans|a l.interieur d[eu]) (l.opercule|le bouchon|l.emballage|le paquet|la boite)", r"ticket de caisse", r"code[- ]barres?", r"code (unique )?(figurant|present) sur",
     r"frais (d.?inscription|de participation|de dossier) (de|d.un montant)", r"sms surtaxe", r"numero surtaxe", r"appel surtaxe",
     r"purchase (is )?(necessary|required)", r"proof of purchase", r"entry fee", r"must purchase", r"with (any|every) purchase",
     r"compra (es )?obligatoria", r"prueba de compra", r"ticket de compra",
@@ -363,7 +364,7 @@ def parse_money(text: str) -> tuple[float, str] | None:
     return v, CURRENCY_SYMBOLS.get(cur, "EUR")
 
 
-PRIZE_LINE = re.compile(r"(lot|prize|premio|gewinn|premio|prémio|prijs|dotation|a gagner|to win|grand prize|1er prix|\d+\s*x\s)", re.I)
+PRIZE_LINE = re.compile(r"(lot|prize|premio|gewinn|premio|prémio|prijs|dotation|a gagner|tentez de gagner|to win|grand prize|1er prix|\d+\s*x\s)", re.I)
 
 
 def analyze_prizes(sents: list[str], sn: list[str], a: RulesAnalysis) -> None:
