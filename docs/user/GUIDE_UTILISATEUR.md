@@ -13,11 +13,11 @@ Ce que l'application fait : elle lit des pages publiques, analyse les règlement
    - **Participation automatique** : l'application peut soumettre seule un formulaire, uniquement si le règlement l'autorise clairement, sans CAPTCHA ni connexion. Décochée par défaut.
    - **Conservation des preuves** : l'application garde des captures d'écran de vos participations.
    - **Notifications par e-mail** : consentement enregistré, mais l'envoi d'e-mails n'est pas encore disponible dans cette version (notifications dans l'application uniquement).
-4. Ouvrez **Sources**. Les quatre agrégateurs (Jeu-concours.biz, Le Démon du Jeu, ToutGagner, Concours du Net) sont **désactivés** à l'installation.
+4. Ouvrez **Sources**. La source Le Démon du Jeu est **désactivée** à l'installation : lisez sa note puis activez-la.
 5. Avant d'activer une source, lisez sa **note sur les CGU** (conditions générales d'utilisation du site). Si les CGU interdisent la collecte automatisée, ne l'activez pas.
 6. Activez ensuite les sources que vous acceptez. Le planificateur les parcourt automatiquement.
 
-Les connecteurs des quatre agrégateurs n'ont pas pu être testés sur les vrais sites pendant le développement : leurs sites n'étaient pas accessibles depuis l'environnement de test. Ils sont donc livrés désactivés. Vérifiez, à la première activation, que les concours trouvés sont bien réels et que les informations sont correctes.
+Jeu-concours.biz et ToutGagner sont exclus : leurs conditions d'utilisation interdisent la collecte automatique ou réservent le contenu aux abonnés. Concours du Net n'existe plus. Le robot ne suit jamais le lien « Voir le concours » de Le Démon du Jeu (interdit par son robots.txt) : vous pouvez, vous, cliquer dessus depuis la fiche.
 
 ## 2. Le cycle d'un concours
 

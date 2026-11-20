@@ -403,6 +403,10 @@ def new_source(body: NewSource, db: Session = Depends(get_db)) -> dict:
         raise HTTPException(400, f"Type inconnu. Types : {', '.join(load_connectors())}")
     if not is_safe_http_url(body.url):
         raise HTTPException(400, "URL invalide")
+    from ..discovery.policy import denial_reason
+
+    if denial_reason(body.url):
+        raise HTTPException(409, f"Site exclu : {denial_reason(body.url)}")
     if db.scalars(select(Source).where(Source.url == body.url)).first():
         raise HTTPException(409, "Source déjà présente")
     cls = load_connectors()[body.kind]
@@ -423,6 +427,11 @@ class SourcePatch(BaseModel):
 def patch_source(sid: int, body: SourcePatch, db: Session = Depends(get_db)) -> dict:
     s = _404(db.get(Source, sid), "Source")
     if body.enabled is not None:
+        from ..discovery.policy import denial_reason
+
+        why = denial_reason(s.url)
+        if body.enabled and (why or s.kind not in load_connectors()):
+            raise HTTPException(409, f"Source non activable : {why or 'connecteur retiré'}")
         s.enabled = body.enabled
     if body.name:
         s.name = body.name

@@ -10,3 +10,7 @@
 | D6 | 2026-11-20 | Dépôt Git local en attendant un dépôt GitHub | Aucun dépôt attaché au projet | L2 |
 | D7 | 2026-11-20 | Connecteurs agrégateurs testés sur fixtures | Sites bloqués par le proxy du conteneur | L2 |
 | D8 | 2026-11-20 | L'extension ne soumet jamais seule : préremplit, l'humain valide | Respect des CGU et du consentement | L2 |
+| D9 | 2026-11-20 | Jeu-concours.biz exclu (policy.py) | Mentions légales : extraction automatisée et outils de participation automatisée interdits sans autorisation écrite d'EKOJEU | L2 |
+| D10 | 2026-11-20 | ToutGagner exclu | Organisateur/règlement/réponses réservés aux abonnés, reproduction interdite | L2 |
+| D11 | 2026-11-20 | Concours du Net retiré | Domaine inexistant en DNS | L2 |
+| D12 | 2026-11-20 | LDDJ seul agrégateur actif, sans /toconc.php ; URL organisateur déduite de l'attribut de suivi si l'hôte correspond | robots.txt interdit /toconc.php ; aucune clause anti-extraction | L2 |

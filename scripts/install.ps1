@@ -1,6 +1,7 @@
 ﻿# Installation de Concours Hunter sous Windows 10/11 (sans Docker, sans droits administrateur).
-# Usage : clic droit > Exécuter avec PowerShell, ou :  powershell -ExecutionPolicy Bypass -File scripts\install.ps1 [-NoBrowser]
-param([switch]$NoBrowser)
+# Usage : clic droit > Exécuter avec PowerShell, ou :  powershell -ExecutionPolicy Bypass -File scripts\install.ps1 [-NoBrowser] [-Dev]
+# -Dev installe aussi les outils de test (pytest).
+param([switch]$NoBrowser, [switch]$Dev)
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
 Set-Location $Root
@@ -25,12 +26,14 @@ Write-Host "Python trouvé : $py"
 if (-not (Test-Path ".venv")) { & cmd /c "$py -m venv .venv" }
 & .\.venv\Scripts\python.exe -m pip install --upgrade pip --quiet
 & .\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt --quiet
+if ($Dev) { & .\.venv\Scripts\python.exe -m pip install -r backend\requirements-dev.txt --quiet }
 if (-not $NoBrowser) {
     Write-Host "Installation du navigateur Chromium pour la participation automatique (optionnelle, ~150 Mo)..."
     & .\.venv\Scripts\python.exe -m playwright install chromium
 }
 Push-Location backend
-& ..\.venv\Scripts\python.exe -m app.cli migrate
+# Les journaux INFO sortent sur stderr : sous PowerShell 5.1 ils peuvent apparaitre en rouge, c'est normal.
+& ..\.venv\Scripts\python.exe -m app.cli migrate 2>&1 | Out-Host
 & ..\.venv\Scripts\python.exe -m app.cli doctor
 Pop-Location
 Write-Host ""

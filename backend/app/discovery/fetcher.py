@@ -114,6 +114,11 @@ class Fetcher:
             raise FetchBlocked("Arrêt demandé")
         if not is_safe_http_url(url):
             raise FetchBlocked(f"URL refusée : {url}")
+        from .policy import denial_reason
+
+        why = denial_reason(url)
+        if why:
+            raise FetchBlocked(f"Site exclu (CGU) : {why}")
         if not self.allowed(url):
             raise FetchBlocked(f"Interdit par robots.txt : {url}")
         host = urlsplit(url).hostname or ""
