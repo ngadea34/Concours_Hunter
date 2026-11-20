@@ -4,7 +4,7 @@ Application web **locale** pour trouver, qualifier, organiser et suivre les jeux
 Tout tourne sur votre PC (Windows 10/11, Linux, macOS), sans abonnement ni service payant. Utilisable depuis un smartphone sur le même Wi-Fi.
 
 ## Ce que fait l'application
-- **Découverte** : flux RSS, pages publiques, agrégateurs (Jeu-concours.biz, LDDJ, ToutGagner, Concours du Net) via des connecteurs extensibles, dans le respect de robots.txt et avec une cadence limitée.
+- **Découverte** : flux RSS, pages publiques, l'agrégateur Le Démon du Jeu (Jeu-concours.biz et ToutGagner exclus car leurs conditions l'interdisent) via des connecteurs extensibles, dans le respect de robots.txt et avec une cadence limitée.
 - **Qualification** : lecture du règlement (FR, EN, ES, DE, IT, PT, NL, PDF compris), gratuité, éligibilité depuis la France, âge, dates, lots, limites, interdiction d'automatisation, délai de réclamation. Chaque décision cite l'extrait du règlement. IA locale (Ollama) facultative, jamais seule juge d'une décision critique.
 - **Scores** de fiabilité et d'intérêt sur 100 (ce ne sont pas des probabilités de gain), détection d'arnaques et d'injections.
 - **Déduplication** multi-sources avec provenance, base de réponses vérifiées par recoupement.

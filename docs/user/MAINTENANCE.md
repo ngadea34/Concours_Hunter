@@ -107,9 +107,9 @@ Si la base est signalée comme non intègre, arrêtez l'application et restaurez
 3. Vérifiez la note sur les CGU du site, puis activez la source si elle vous convient.
 4. Cliquez sur **Lancer un scan** pour tester. L'historique des scans apparaît sous la liste.
 
-### Les quatre agrégateurs
+### Les agrégateurs
 
-Jeu-concours.biz, Le Démon du Jeu, ToutGagner et Concours du Net sont livrés **désactivés**. Leurs connecteurs n'ont pas pu être testés sur les vrais sites pendant le développement. Activez-les un par un, après avoir lu leurs CGU, et contrôlez les premiers résultats.
+Seul Le Démon du Jeu est intégré (livré **désactivé**). Jeu-concours.biz et ToutGagner sont bloqués dans le code (`backend/app/discovery/policy.py`) car leurs conditions l'interdisent ; ils ne peuvent être réactivés qu'avec une autorisation écrite de l'éditeur. Si Le Démon du Jeu change sa mise en page, la source affichera « aucun concours reconnu ».
 
 ### Quand un site change
 
@@ -143,7 +143,7 @@ L'application lit des variables `CH_...` dans l'environnement ou dans un fichier
 | `CH_LOG_LEVEL` | `INFO` | Niveau de détail du journal. |
 | `CH_MAX_BACKUPS` | `10` | Nombre de sauvegardes conservées. |
 | `CH_SCHEDULER_ENABLED` | `true` | Active le planificateur. |
-| `CH_SEED_SOURCES` | `true` | Crée les quatre agrégateurs (désactivés) au premier lancement. |
+| `CH_SEED_SOURCES` | `true` | Crée la source Le Démon du Jeu (désactivée) au premier lancement. |
 | `CH_MIN_DELAY_PER_DOMAIN_S` | `5` | Délai minimal entre deux requêtes vers un même site. |
 | `CH_HTTP_TIMEOUT` | `20` | Délai d'attente des requêtes, en secondes. |
 
