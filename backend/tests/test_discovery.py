@@ -18,9 +18,9 @@ def router(request: httpx.Request) -> httpx.Response:
             return httpx.Response(200, text="User-agent: *\nDisallow: /")
         return httpx.Response(404)
     if u == "https://agg.test/":
-        return httpx.Response(200, text=(SITES / "listing.html").read_text(), headers=html)
+        return httpx.Response(200, text=(SITES / "listing.html").read_text(encoding="utf-8"), headers=html)
     if u == "https://agg.test/fiche/ps5":
-        return httpx.Response(200, text=(SITES / "fiche_ps5.html").read_text(), headers=html)
+        return httpx.Response(200, text=(SITES / "fiche_ps5.html").read_text(encoding="utf-8"), headers=html)
     if u == "https://agg.test/fiche/us":
         return httpx.Response(200, text="<html><a href='https://acme.test/sweeps'>Enter now</a><a href='https://acme.test/rules'>Official Rules</a></html>", headers=html)
     if u == "https://acme.test/sweeps":
@@ -28,7 +28,7 @@ def router(request: httpx.Request) -> httpx.Response:
     if u == "https://acme.test/rules":
         return httpx.Response(200, text="<html><body>" + rules("us_only.txt").replace("2026", "2099") + "</body></html>", headers=html)
     if u == "https://jouets-exemple.test/jeu-ps5":
-        return httpx.Response(200, text=(SITES / "org_ps5.html").read_text(), headers=html)
+        return httpx.Response(200, text=(SITES / "org_ps5.html").read_text(encoding="utf-8"), headers=html)
     if u == "https://jouets-exemple.test/reglement-ps5":
         return httpx.Response(200, text="<html><body><pre>" + RULES_PS5 + "</pre></body></html>", headers=html)
     if "geo.test" in u:
