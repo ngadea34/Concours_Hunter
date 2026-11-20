@@ -45,6 +45,8 @@ export const en: Record<keyof typeof fr, string> = {
   'cat.sort.end_date': 'Closing date', 'cat.sort.-interest': 'Interest', 'cat.sort.-reliability': 'Reliability',
   'cat.sort.-created': 'Newest', 'cat.addByUrl': 'Add a contest by URL', 'cat.addTitle': 'Add a contest',
   'cat.addUrl': 'Contest page address', 'cat.addName': 'Title (optional)', 'cat.added': 'Contest added',
+  'cat.showFilters': 'Show filters',
+  'cat.hideFilters': 'Hide filters',
   'cat.reset': 'Reset', 'cat.reliability': 'Reliability', 'cat.interest': 'Interest', 'cat.by': 'by {name}',
   'cat.prize': 'Prize', 'cat.value': 'Value', 'cat.humanNeeded': 'Human check needed: {reason}',
   'cat.participated': 'Already entered', 'cat.eligFr': 'France: {v}',

@@ -100,7 +100,20 @@ def run() -> None:
     import uvicorn
 
     s = get_settings()
-    uvicorn.run("app.main:app", host=s.host, port=s.port, log_level=s.log_level.lower())
+    host = s.host
+    try:  # mode LAN (smartphone) : activé dans Réglages, pris en compte au redémarrage
+        from .admin.settings_service import get_settings_dict
+        from .db.migrations import migrate
+
+        migrate()
+        with session_scope() as db:
+            if get_settings_dict(db)["lan_mode"] and host == "127.0.0.1":
+                host = "0.0.0.0"
+    except Exception:  # noqa: BLE001
+        pass
+    if host != "127.0.0.1":
+        log.warning("Mode LAN : accès réseau local protégé par jeton (python -m app.cli token)")
+    uvicorn.run("app.main:app", host=host, port=s.port, log_level=s.log_level.lower())
 
 
 if __name__ == "__main__":

@@ -45,6 +45,8 @@ export const fr = {
   'cat.sort.end_date': 'Date de clôture', 'cat.sort.-interest': 'Intérêt', 'cat.sort.-reliability': 'Fiabilité',
   'cat.sort.-created': 'Plus récents', 'cat.addByUrl': 'Ajouter un concours par URL', 'cat.addTitle': 'Ajouter un concours',
   'cat.addUrl': 'Adresse de la page du concours', 'cat.addName': 'Titre (facultatif)', 'cat.added': 'Concours ajouté',
+  'cat.showFilters': 'Afficher les filtres',
+  'cat.hideFilters': 'Masquer les filtres',
   'cat.reset': 'Réinitialiser', 'cat.reliability': 'Fiabilité', 'cat.interest': 'Intérêt', 'cat.by': 'par {name}',
   'cat.prize': 'Lot', 'cat.value': 'Valeur', 'cat.humanNeeded': 'Vérification humaine : {reason}',
   'cat.participated': 'Déjà participé', 'cat.eligFr': 'France : {v}',

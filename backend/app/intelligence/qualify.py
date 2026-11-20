@@ -116,6 +116,8 @@ def qualify(db: Session, contest: Contest, force: bool = False, source_trust: in
     settings = get_settings_dict(db)
     profile = get_profile(db)
 
+    contest.language = contest.language or a.get("language")
+
     # --- gratuité (critique)
     free_status, free_verified = a["free_status"], a["free_status"] != "unknown"
     if "free" in human:

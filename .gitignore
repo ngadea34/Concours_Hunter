@@ -4,7 +4,6 @@ __pycache__/
 data/
 node_modules/
 frontend/dist/
-backend/app/static/
 .pytest_cache/
 *.log
 dist/

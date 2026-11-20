@@ -25,6 +25,22 @@ MAX_BYTES = 8_000_000
 ALLOWED_TYPES = ("text/html", "application/xhtml", "application/xml", "text/xml", "application/rss", "application/atom", "application/pdf", "text/plain")
 
 
+def resolves_to_private(host: str) -> bool:
+    """Anti-SSRF : refuse un nom de domaine public qui pointe vers le réseau local."""
+    import ipaddress
+    import socket
+
+    try:
+        infos = socket.getaddrinfo(host, None)
+    except OSError:
+        return False  # non résolu : la requête échouera d'elle-même
+    for info in infos:
+        ip = ipaddress.ip_address(info[4][0])
+        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved:
+            return True
+    return False
+
+
 class FetchBlocked(Exception):
     """La récupération est interdite (robots, protection, quota) : ne pas réessayer en force."""
 
@@ -53,6 +69,7 @@ class Fetcher:
         self._hist: dict[str, deque] = defaultdict(deque)
         self._lock = threading.Lock()
         self.stopped = threading.Event()
+        self.check_dns = client is None  # désactivé seulement avec un client de test injecté
 
     # -- robots
     def allowed(self, url: str) -> bool:
@@ -100,6 +117,8 @@ class Fetcher:
         if not self.allowed(url):
             raise FetchBlocked(f"Interdit par robots.txt : {url}")
         host = urlsplit(url).hostname or ""
+        if self.check_dns and resolves_to_private(host):
+            raise FetchBlocked(f"Domaine pointant vers le réseau local refusé : {host}")
         self._throttle(host)
         headers = {}
         if etag:

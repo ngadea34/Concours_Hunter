@@ -20,6 +20,7 @@ export function Catalog() {
   const toast = useToast();
   const nav = useNavigate();
   const [sp, setSp] = useSearchParams();
+  const [showAdv, setShowAdv] = useState<boolean>(() => typeof window === 'undefined' || window.innerWidth >= 768);
   const [addOpen, setAddOpen] = useState(false);
   const [addUrl, setAddUrl] = useState('');
   const [addTitle, setAddTitle] = useState('');
@@ -75,6 +76,12 @@ export function Catalog() {
           <label htmlFor="f-q">{t('cat.search')}</label>
           <input id="f-q" type="search" value={get('q')} placeholder={t('cat.searchPh')} onChange={(e) => set('q', e.target.value)} />
         </div>
+        <div className="field filters-toggle">
+          <button type="button" className="btn" aria-expanded={showAdv} aria-controls="adv-filters" onClick={() => setShowAdv((v) => !v)}>
+            {showAdv ? t('cat.hideFilters') : t('cat.showFilters')}
+          </button>
+        </div>
+        <div id="adv-filters" className={showAdv ? 'adv-filters' : 'adv-filters adv-hidden'}>
         {sel('f-status', t('common.status'), 'status', CONTEST_STATUSES.map((v) => ({ v, l: t(`status.${v}`) })))}
         {sel('f-cat', t('cat.category'), 'category', PRIZE_CATEGORIES.map((v) => ({ v, l: t(`prize.${v}`) })))}
         {sel('f-free', t('cat.free'), 'free_status', FREE_STATUSES.map((v) => ({ v, l: t(`free.${v}`) })))}
@@ -94,6 +101,7 @@ export function Catalog() {
           </select>
         </div>
         <div className="field"><button type="button" className="btn" onClick={() => setSp({}, { replace: true })}>{t('cat.reset')}</button></div>
+        </div>
       </form>
       <Async state={list} isEmpty={(p) => p.items.length === 0}>
         {(p) => (
