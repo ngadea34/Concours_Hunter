@@ -27,6 +27,22 @@ Dans le **Catalogue**, le filtre **Type de jeu** trie les concours comme sur les
 
 Jeu-concours.biz et ToutGagner ne sont pas lus par l'application : leurs conditions d'utilisation l'interdisent. Vous pouvez les consulter vous-même et ajouter un concours qui vous intéresse avec l'extension, depuis la page de l'organisateur.
 
+## 1 ter. Ma semaine : votre programme
+
+La page **Ma semaine** répond à la question « qu'est-ce que je fais cette semaine ? ».
+
+- **En haut** : 8 indicateurs (participations prévues, faites, résultats attendus, clôtures proches, tâches, gains à réclamer…) et des flèches pour changer de semaine. La semaine va du lundi au dimanche.
+- **Programme** : les meilleurs concours gratuits, ouverts en France, avec règlement, répartis jour par jour dans votre temps disponible (30 min par jour par défaut, réglable). Pour chacun : **Accepter**, **Refuser**, **Reporter**, **Favori**. **Marquer réalisé** demande une preuve (numéro de confirmation, texte du message reçu ou capture) : sans preuve, une participation n'est jamais comptée.
+- **Résultats** : quand le tirage et la publication des gagnants sont prévus. Une date « estimée » n'a pas été trouvée dans le règlement. L'application n'annonce jamais un gain sans preuve officielle vérifiée.
+- **Dernières chances** : ce qui ferme dans 24 h, 48 h, 7 jours, 14 jours.
+- **Opportunités** : concours intéressants hors programme. « Suivre » ne fait que les garder à l'œil.
+- **Shop & Promo** : offres de remboursement et concours avec achat. Les montants « conditionnels » ne sont pas encore reçus.
+- **Tâches** : à faire, en cours, en attente, faite, annulée, expirée, avec historique. Vous pouvez ajouter les vôtres.
+- **Rapports** : synthèse du lundi 8 h, bilan du dimanche 18 h, synthèse quotidienne si vous l'activez. Bouton **Imprimer** pour un PDF.
+- **Réglages** : fuseau horaire, heures des synthèses, rappel 48 h et alerte 24 h avant clôture, minutes par jour, jours actifs, objectif de la semaine, intérêt et fiabilité minimum.
+
+La barre de commande accepte `/hunter-week plan`, `results`, `deadlines`, `opportunities`, `tasks`, `report`, `next`, `settings minutes_per_day=45`. Les mêmes commandes existent en ligne de commande : `python -m app.cli hunter-week plan`.
+
 ## 2. Le cycle d'un concours
 
 Chaque concours suit ce parcours :

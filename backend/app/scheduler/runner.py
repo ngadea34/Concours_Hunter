@@ -15,7 +15,6 @@ from ..db.models import Contest, Participation, ScanJob, Source, utcnow
 from ..db.session import session_scope
 from ..discovery.fetcher import Fetcher
 from ..discovery.pipeline import enrich_backlog, run_scan
-from ..notifications.service import notify
 from ..rewards.service import check_deadlines
 
 log = logging.getLogger(__name__)
@@ -72,10 +71,17 @@ class Runner:
             today = date.today()
             for c in db.scalars(select(Contest).where(Contest.end_date < today, Contest.status.in_(("new", "qualified", "to_verify")))):
                 c.status = "expired"
-            soon = today + timedelta(days=3)
-            for c in db.scalars(select(Contest).where(Contest.status == "qualified", Contest.end_date >= today, Contest.end_date <= soon)):
-                notify(db, "closing_soon", f"Clôture le {c.end_date:%d/%m} : {c.title[:150]}", c.prize_summary, c.id, dedup_key=f"soon:{c.id}")
+            # les rappels de clôture sont faits par M15 (préférences : 48 h / 24 h, regroupement des alertes non urgentes)
             check_deadlines(db)
+            if not self.paused:
+                from ..participation.profile import get_profile
+                from ..weekly.results import check_result_pages
+
+                f = Fetcher(max_per_hour=get_settings_dict(db)["max_requests_per_domain_per_hour"])
+                try:
+                    check_result_pages(db, f, today, get_profile(db))
+                finally:
+                    f.close()
 
     def job_auto(self) -> None:
         from ..participation.browser_runner import run_auto
@@ -86,10 +92,16 @@ class Runner:
                     break
                 run_auto(db, p)
 
+    def job_weekly(self) -> None:
+        from ..weekly.tick import tick
+
+        with session_scope() as db:
+            tick(db)
+
     def job_backup(self) -> None:
         create_backup(label="auto")
 
-    JOBS = {"scan": ("job_scan", 15), "daily": ("job_daily", 360), "auto": ("job_auto", 30), "backup": ("job_backup", 1440)}
+    JOBS = {"scan": ("job_scan", 15), "daily": ("job_daily", 360), "weekly": ("job_weekly", 15), "auto": ("job_auto", 30), "backup": ("job_backup", 1440)}
 
     # ------------------------------------------------------------------ cycle de vie
     def start(self) -> None:

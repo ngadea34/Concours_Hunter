@@ -1,13 +1,15 @@
 # État du projet — à relire en premier après une interruption
 
 Dernière mise à jour : 2026-11-20 (UTC)
-Dépôt : https://github.com/ngadea34/concours_hunter — `main` = phase 0 ; branche `socle-produit` = produit complet (PR ouverte).
+Dépôt : https://github.com/ngadea34/concours_hunter — `main` = v0.2.1 (PR #1 à #6 fusionnées) ; branche `programme-semaine` = v0.3.0 (M15).
+
+Ordre des directives de Nico (2026-11-20) : 1) M15 Programme de la semaine (fait, v0.3.0) ; 2) révision de la politique de sources (7 catégories, audit des 4 agrégateurs, indices A1 à A8, filtres) ; 3) M14 Shop & Promo.
 
 | Phase | Statut | Preuve |
 |---|---|---|
 | 0 Audit | ✅ | AUDIT_PHASE0.md, MODEL_ROUTING.md |
 | 1 Fondations | ✅ | `python -m app.cli serve` démarre ; UI servie sur :8765 |
-| 2 Base de données | ✅ | 21 tables, migrations versionnées, WAL, sauvegarde/restauration testées |
+| 2 Base de données | ✅ | 30 tables (v4), migrations versionnées, WAL, sauvegarde/restauration testées |
 | 3 Découverte | ✅ (fixtures) | RSS, HTML générique, dédup, provenance — tests `test_discovery.py` |
 | 4 Agrégateurs | ✅ revu | Audit réel 2026-11-20 : LDDJ intégré (structure réelle) ; Jeu-concours.biz et ToutGagner exclus (CGU) ; Concours du Net inexistant. Aucun RSS sur ces sites |
 | 5 Intelligence | ✅ | règles R0 7 langues + Ollama R1/R2 optionnel avec citations vérifiées |
@@ -35,7 +37,15 @@ Dépôt : https://github.com/ngadea34/concours_hunter — `main` = phase 0 ; bra
 - Migration v2 OK (sauvegarde auto), 46/46 tests (après avoir pointé PLAYWRIGHT_BROWSERS_PATH ; corrigé en 0.2.1).
 - 15 sites suggérés depuis les 128 concours. 5 suivis et scannés en 8 min 47 : ici.fr 2 concours, leclub-bricolage.fr 1 (page de liste, corrigé), lillelanuit.com 5 (URL remplacée par une playlist Deezer, corrigé), arte.tv refusé par robots.txt (correct), francetelevisions.fr 0 (sitemap en www ignoré, corrigé).
 
+## Programme de la semaine (M15, v0.3.0)
+- Code : `backend/app/weekly/` (timeutil, prefs, plan, results, tasks, shop, view, reports, tick, commands), routes `api/weekly_routes.py`, page `frontend/src/pages/Week.tsx`.
+- Tout est déterministe (aucun LLM). Heures stockées en UTC naïf, affichées dans le fuseau des préférences (Europe/Paris par défaut).
+- Job `weekly` toutes les 15 min : rafraîchit, envoie les rappels, génère synthèse du lundi / bilan du dimanche (avec rattrapage si le PC était éteint).
+- Garde-fous : participation « réalisée » seulement avec preuve ; « gagné » seulement avec résultat vérifié et score anti-phishing < 50 ; opportunité jamais convertie en participation ; remboursement « reçu » seulement avec montant constaté.
+- 22 tests `test_weekly.py` couvrent les 16 cas de la directive.
+
 ## Reste à faire
+0. Révision de la politique de sources, puis M14 Shop & Promo (voir ROADMAP).
 1. Faire grandir l'agrégateur maison : suivre les sites suggérés (Sources), et en ajouter à la main.
 2. Jeu-concours.biz : seulement avec autorisation écrite d'EKOJEU (démarche de Nico).
 3. Optionnel : notifications hors application (e-mail / ntfy), connecteur « pages gagnants ».

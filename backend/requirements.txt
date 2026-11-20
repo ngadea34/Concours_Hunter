@@ -12,3 +12,4 @@ apscheduler==3.11.3       # MIT  - planificateur
 cryptography==50.0.2      # Apache-2.0/BSD - chiffrement du profil
 rapidfuzz==3.14.6         # MIT  - déduplication approximative
 playwright==1.65.2        # Apache-2.0 - participation automatique encadrée (optionnelle)
+tzdata==2026.6            # Apache-2.0 - fuseaux horaires (Windows n'en fournit pas à Python)

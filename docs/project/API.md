@@ -102,3 +102,24 @@ Page<T> { items:T[]; total:number; page:number; page_size:number }
 | POST | /api/admin/restore | `{name}` | `{ok}` |
 | GET | /api/admin/diagnostics | | `{python, db_path, db_size, ollama:{reachable, models[]}, disk_free_gb, version}` |
 | GET | /api/admin/logs | `limit?` | `{ts, actor, action, detail}[]` (audit_logs) |
+
+### Programme de la semaine (M15)
+| Méthode | Route | Corps / paramètres | Réponse |
+|---|---|---|---|
+| GET | /api/weekly | `week?` (AAAA-MM-JJ, n'importe quel jour de la semaine) | WeekView : bornes, 8 KPI, prioritaires, résultats, dernières chances, opportunités, shop, tâches |
+| POST | /api/weekly/plan | `{week?}` | WeekView (409 si semaine passée) |
+| POST | /api/weekly/items/{id} | `{action: accept|refuse|postpone|favorite|unfavorite|reset, until?}` | WeekItem |
+| POST | /api/weekly/items/{id}/done | `{proof_text?, screenshot?}` | WeekItem ; 400 sans preuve |
+| POST | /api/weekly/opportunities | `{contest_id, follow:boolean}` | `{ok}` (suivi seulement, jamais de participation) |
+| PATCH | /api/weekly/results/{id} | `{status?, verify_url?, note?}` | WeekResult (« won » refusé en manuel) |
+| GET/POST | /api/weekly/tasks | `status?` / `{title, due_at?, kind?, contest_id?}` | WeekTask[] / WeekTask |
+| PATCH | /api/weekly/tasks/{id} | `{status?, due_at?, postpone_days?, title?, note?}` | WeekTask |
+| GET | /api/weekly/tasks/{id}/history | | TaskHistory[] |
+| GET/PUT | /api/weekly/preferences | WeekPrefs (partiel en PUT) | WeekPrefs |
+| GET | /api/weekly/reports | `kind?` | WeekReport[] |
+| POST | /api/weekly/reports/{kind} | kind = weekly|daily|review, `{week?}` | WeekReport (texte Markdown) |
+| GET | /api/weekly/reports/{id} | | WeekReport |
+| GET/POST | /api/promotions | | Promotion[] / Promotion |
+| PATCH | /api/promotions/{id} | `{status?, refund_received_eur?, …}` | Promotion ; « refunded » exige `refund_received_eur` |
+| POST | /api/weekly/command | `{command:"/hunter-week plan|results|deadlines|opportunities|tasks|report|next|settings [clé=valeur]"}` | `{text, data}` |
+

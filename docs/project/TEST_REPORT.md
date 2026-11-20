@@ -4,11 +4,37 @@ Environnements : conteneur Linux (Python 3.13) ; CI GitHub Linux + Windows ; PC 
 
 | Suite | Résultat |
 |---|---|
-| Backend `cd backend && python -m pytest` | **38/38 réussis** (≈5 s), Linux et Windows |
+| Backend `cd backend && python -m pytest` | **71/71 réussis** (≈10 s, conteneur Linux, v0.3.0) ; 38/38 sur le PC de Nico en v0.1 |
 | Extension `node --test extension/test/` | **8/8 réussis** (dont e2e Chromium : remplissage, aucun submit) |
 | Frontend `npm run build` (tsc strict + vite) | OK |
+| Page « Ma semaine » dans Chromium (1280px, 390px) | 0 erreur console, pas de défilement horizontal |
 | UI dans Chromium, 9 pages × 2 tailles (1280px, 390px) | 0 erreur console, 0 requête en échec, pas de défilement horizontal |
 | Parcours UI : fiche → préparer → participations | OK |
+
+## Cas obligatoires M15 (Programme de la semaine)
+| Cas | Test (`tests/test_weekly.py`) |
+|---|---|
+| Concours pas encore joué → recommandé | test_not_yet_participated_is_recommended |
+| Déjà joué → pas recommandé à nouveau | test_already_participated_is_not_recommended_again |
+| Concours clos → jamais recommandé | test_closed_contest_never_recommended |
+| Réalisé sans preuve refusé | test_mark_done_requires_proof, test_participate_task_cannot_be_done_without_proof |
+| Résultat prévu mais non publié | test_result_planned_but_not_published |
+| Résultat publié ; gain seulement avec preuve | test_result_officially_published_and_win_needs_proof |
+| Participation en attente de confirmation | test_participation_awaiting_confirmation_is_tracked |
+| Gain à réclamer → tâche urgente | test_gain_to_claim_creates_urgent_task |
+| Date de clôture modifiée → tâche et rappels mis à jour | test_closing_date_change_updates_task_and_reminders |
+| Concours rejeté ou fusionné → retiré du programme | test_rejected_or_merged_contest_leaves_plan |
+| Semaine vide | test_empty_week |
+| Semaine chargée : budget de temps et intérêt respectés | test_busy_week_respects_time_goal_and_interest |
+| Tâche reportée puis expirée | test_task_postponed_then_expired |
+| Remboursement reçu / conditionnel | test_refund_received_and_conditional_amounts |
+| Notifications désactivées | test_notifications_disabled |
+| Alerte urgente unique, rappels groupés | test_urgent_alert_sent_once_and_non_urgent_grouped |
+| Changement de fuseau horaire (et heure d'hiver) | test_timezone_change |
+| Synthèse du lundi, bilan du dimanche, rattrapage | test_tick_generates_summary_monday_and_review_sunday_with_catch_up |
+| Opportunité jamais convertie en participation | test_opportunity_follow_never_becomes_participation |
+| Arnaque jamais proposée | test_scam_is_never_an_opportunity |
+| API et commandes `/hunter-week` | test_api_and_commands |
 
 ## Scénarios obligatoires (12.1)
 | Scénario | Test |

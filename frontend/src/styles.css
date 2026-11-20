@@ -149,3 +149,12 @@ legend { font-weight: 700; padding: 0 .4rem; }
 .list { list-style: none; padding: 0; margin: 0 0 1rem; }
 .list > li { padding: .6rem 0; border-bottom: 1px solid var(--border); }
 .list > li:last-child { border-bottom: 0; }
+
+.tabs { display: flex; flex-wrap: wrap; gap: .4rem; margin: .5rem 0 1rem; }
+@media print {
+  .sidebar, .no-print, .tabs, .toasts, .skip { display: none !important; }
+  .main { margin: 0; padding: 0; max-width: none; }
+  .card { box-shadow: none; border: 0; }
+  body { background: #fff; color: #000; }
+}
+.input-auto { width: auto !important; }

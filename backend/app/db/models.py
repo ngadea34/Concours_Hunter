@@ -333,3 +333,142 @@ class FetchCache(Base):
     last_modified: Mapped[str | None] = mapped_column(String(100))
     body_path: Mapped[str | None] = mapped_column(String(500))
     fetched_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+# ---------------------------------------------------------------- M14 (suivi minimal) : promotions et remboursements
+class Promotion(Base, TimestampMixin):
+    """Offre de remboursement, réduction ou jeu avec achat suivi par l'utilisateur. Aucun achat n'est jamais déclenché."""
+    __tablename__ = "promotions"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(String(300))
+    brand: Mapped[str | None] = mapped_column(String(200))
+    kind: Mapped[str] = mapped_column(String(20), default="full_refund")  # full_refund | partial_refund | purchase_game | discount
+    url: Mapped[str | None] = mapped_column(String(1000))
+    product: Mapped[str | None] = mapped_column(String(300))
+    price_eur: Mapped[float | None] = mapped_column(Float)
+    refund_eur: Mapped[float | None] = mapped_column(Float)  # remboursement promis (conditionnel)
+    refund_received_eur: Mapped[float | None] = mapped_column(Float)  # remboursement réellement reçu
+    end_date: Mapped[date | None] = mapped_column(Date)  # dernier jour d'achat
+    send_deadline: Mapped[date | None] = mapped_column(Date)  # date limite d'envoi du dossier
+    status: Mapped[str] = mapped_column(String(20), default="to_watch", index=True)
+    contest_id: Mapped[int | None] = mapped_column(ForeignKey("contests.id", ondelete="SET NULL"))
+    purchase_date: Mapped[date | None] = mapped_column(Date)
+    sent_date: Mapped[date | None] = mapped_column(Date)
+    received_date: Mapped[date | None] = mapped_column(Date)
+    notes: Mapped[str | None] = mapped_column(Text)
+
+
+# ---------------------------------------------------------------- M15 : Hunter Weekly Command
+class WeeklyPreferences(Base, TimestampMixin):
+    __tablename__ = "weekly_preferences"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    value: Mapped[dict[str, Any]] = mapped_column(default=dict)
+
+
+class WeeklyPlan(Base, TimestampMixin):
+    __tablename__ = "weekly_plans"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    week_start: Mapped[date] = mapped_column(Date, unique=True)  # lundi (calendrier français)
+    generated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    capacity_minutes: Mapped[int] = mapped_column(Integer, default=0)
+    planned_minutes: Mapped[int] = mapped_column(Integer, default=0)
+    items: Mapped[list[WeeklyPlanItem]] = relationship(back_populates="plan", cascade="all, delete-orphan", order_by="WeeklyPlanItem.rank")
+
+
+class WeeklyPlanItem(Base, TimestampMixin):
+    """Recommandation d'une semaine. Pointe vers le concours : aucune copie de ses données (dates, lots...)."""
+    __tablename__ = "weekly_plan_items"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    plan_id: Mapped[int] = mapped_column(ForeignKey("weekly_plans.id", ondelete="CASCADE"), index=True)
+    contest_id: Mapped[int] = mapped_column(ForeignKey("contests.id", ondelete="CASCADE"), index=True)
+    section: Mapped[str] = mapped_column(String(20), default="priority")  # priority | opportunity
+    rank: Mapped[int] = mapped_column(Integer, default=0)
+    priority: Mapped[str] = mapped_column(String(10), default="medium")  # high | medium | low
+    score: Mapped[float] = mapped_column(Float, default=0)
+    est_minutes: Mapped[int] = mapped_column(Integer, default=3)
+    scheduled_day: Mapped[date | None] = mapped_column(Date)
+    reasons: Mapped[list[Any]] = mapped_column(default=list)
+    decision: Mapped[str] = mapped_column(String(12), default="proposed")  # proposed|accepted|refused|postponed|done|obsolete
+    favorite: Mapped[bool] = mapped_column(Boolean, default=False)
+    postponed_to: Mapped[date | None] = mapped_column(Date)
+    participation_id: Mapped[int | None] = mapped_column(ForeignKey("participations.id", ondelete="SET NULL"))
+    plan: Mapped[WeeklyPlan] = relationship(back_populates="items")
+    contest: Mapped[Contest] = relationship()
+    __table_args__ = (UniqueConstraint("plan_id", "contest_id", "section"),)
+
+
+class WeeklyResult(Base, TimestampMixin):
+    """Suivi des résultats d'une participation réellement soumise."""
+    __tablename__ = "weekly_results"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    participation_id: Mapped[int] = mapped_column(ForeignKey("participations.id", ondelete="CASCADE"), unique=True)
+    contest_id: Mapped[int] = mapped_column(ForeignKey("contests.id", ondelete="CASCADE"), index=True)
+    draw_date: Mapped[date | None] = mapped_column(Date)
+    draw_date_estimated: Mapped[bool] = mapped_column(Boolean, default=True)
+    publish_date: Mapped[date | None] = mapped_column(Date)
+    verify_url: Mapped[str | None] = mapped_column(String(1000))
+    status: Mapped[str] = mapped_column(String(20), default="draw_pending")
+    status_manual: Mapped[bool] = mapped_column(Boolean, default=False)
+    last_checked_at: Mapped[datetime | None] = mapped_column(DateTime)
+    note: Mapped[str | None] = mapped_column(Text)
+    participation: Mapped[Participation] = relationship()
+    contest: Mapped[Contest] = relationship()
+
+
+class WeeklyTask(Base, TimestampMixin):
+    __tablename__ = "weekly_tasks"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(String(300))
+    description: Mapped[str | None] = mapped_column(Text)
+    priority: Mapped[str] = mapped_column(String(10), default="medium")  # high | medium | low
+    due_at: Mapped[datetime | None] = mapped_column(DateTime, index=True)  # UTC
+    status: Mapped[str] = mapped_column(String(12), default="todo", index=True)  # todo|in_progress|waiting|done|cancelled|expired
+    action: Mapped[str] = mapped_column(String(30), default="custom")
+    contest_id: Mapped[int | None] = mapped_column(ForeignKey("contests.id", ondelete="SET NULL"), index=True)
+    participation_id: Mapped[int | None] = mapped_column(ForeignKey("participations.id", ondelete="SET NULL"))
+    claim_id: Mapped[int | None] = mapped_column(ForeignKey("claims.id", ondelete="SET NULL"))
+    promotion_id: Mapped[int | None] = mapped_column(ForeignKey("promotions.id", ondelete="SET NULL"))
+    plan_item_id: Mapped[int | None] = mapped_column(ForeignKey("weekly_plan_items.id", ondelete="SET NULL"))
+    proof_note: Mapped[str | None] = mapped_column(Text)
+    auto_key: Mapped[str | None] = mapped_column(String(100), unique=True)  # tâches générées : jamais en double
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime)
+    contest: Mapped[Contest | None] = relationship()
+    history: Mapped[list[WeeklyTaskHistory]] = relationship(back_populates="task", cascade="all, delete-orphan", order_by="WeeklyTaskHistory.id")
+
+
+class WeeklyTaskHistory(Base):
+    __tablename__ = "weekly_task_history"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    task_id: Mapped[int] = mapped_column(ForeignKey("weekly_tasks.id", ondelete="CASCADE"), index=True)
+    at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    field: Mapped[str] = mapped_column(String(30))
+    old: Mapped[str | None] = mapped_column(String(300))
+    new: Mapped[str | None] = mapped_column(String(300))
+    actor: Mapped[str] = mapped_column(String(20), default="user")
+    task: Mapped[WeeklyTask] = relationship(back_populates="history")
+
+
+class WeeklyNotification(Base):
+    """Journal des rappels M15 (déduplication, regroupement des alertes non urgentes dans le bilan du jour)."""
+    __tablename__ = "weekly_notifications"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    key: Mapped[str] = mapped_column(String(150), unique=True)
+    kind: Mapped[str] = mapped_column(String(30))
+    title: Mapped[str] = mapped_column(String(300))
+    urgent: Mapped[bool] = mapped_column(Boolean, default=False)
+    contest_id: Mapped[int | None] = mapped_column(ForeignKey("contests.id", ondelete="SET NULL"))
+    notification_id: Mapped[int | None] = mapped_column(ForeignKey("notifications.id", ondelete="SET NULL"))
+    digested_in: Mapped[int | None] = mapped_column(ForeignKey("weekly_reports.id", ondelete="SET NULL"))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class WeeklyReport(Base):
+    __tablename__ = "weekly_reports"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    kind: Mapped[str] = mapped_column(String(10))  # weekly | daily | review
+    period_start: Mapped[date] = mapped_column(Date, index=True)
+    period_end: Mapped[date] = mapped_column(Date)
+    generated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    data: Mapped[dict[str, Any]] = mapped_column(default=dict)
+    text: Mapped[str] = mapped_column(Text, default="")
+    __table_args__ = (UniqueConstraint("kind", "period_start"),)
