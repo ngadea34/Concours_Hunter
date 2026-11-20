@@ -25,7 +25,7 @@ from .fetcher import Fetcher, FetchBlocked
 log = logging.getLogger(__name__)
 
 RULES_LINK = re.compile(r"r[eè]glement|conditions (du jeu|de participation)|official rules|terms and conditions|t&c|bases (legales|del concurso)|teilnahmebedingungen|regolamento|regulamento|actievoorwaarden|spelregels", re.I)
-PARTICIPATE_LINK = re.compile(r"particip|jouer|je joue|tenter ma chance|acc[eé]der au (jeu|concours)|enter|play|participar|teilnehmen|partecipa|deelnemen|site du jeu|voir le jeu", re.I)
+PARTICIPATE_LINK = re.compile(r"particip|jouer|je joue|tenter ma chance|acc[eé]der au (jeu|concours)|\benter\b|\bplay\b|participar|teilnehmen|partecipa|deelnemen|site du jeu|voir le jeu", re.I)
 QA_RX = re.compile(r"(?:question|q)\s*(?:\d+)?\s*[:\-–]\s*(?P<q>[^\n]{5,300}?)\s*(?:\n|\s)+(?:r[ée]ponse|answer|respuesta|antwort|risposta|resposta|antwoord|r)\s*[:\-–]\s*(?P<a>[^\n]{1,200})", re.I)
 STOPWORDS = {"jeu", "concours", "gagnez", "gagner", "tentez", "de", "la", "le", "les", "un", "une", "des", "du", "a", "et", "pour", "win", "the", "giveaway", "sweepstakes", "contest", "votre", "vos", "avec", "chez", "sur", "en", "au", "aux", "your", "with", "at", "on", "jeu-concours", "remportez", "offert", "offre"}
 
@@ -156,7 +156,8 @@ def enrich(db: Session, fetcher: Fetcher, contest: Contest, raw: RawContest, sou
                 continue
             if not rules_url and RULES_LINK.search(label):
                 rules_url = href
-            if source and _domain(href) != src_dom and PARTICIPATE_LINK.search(label) and _domain(contest.url) == _domain(source.url):
+            if (source and source.kind != "site" and _domain(href) != src_dom and PARTICIPATE_LINK.search(label)
+                    and _domain(contest.url) == _domain(source.url)):
                 contest.url, contest.canonical_url = href, canonical_url(href)
     if not contest.description or len(contest.description) < 200:
         contest.description = text[:5000]
@@ -221,7 +222,8 @@ def run_scan(db: Session, source: Source, fetcher: Fetcher | None = None, max_en
             job.checkpoint = {"done": sorted(done)[-500:]}
             db.commit()
         job.status = "ok"
-        source.last_status = source.last_status if source.last_status and "repli" in source.last_status else "ok"
+        note = getattr(conn, "note", None)
+        source.last_status = note or (source.last_status if source.last_status and "repli" in source.last_status else "ok")
     except FetchBlocked as e:
         db.rollback()
         job.status, job.error = "skipped", str(e)

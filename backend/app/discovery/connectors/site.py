@@ -27,7 +27,8 @@ CONTEST_PATH = re.compile(r"jeux?[-_/]?concours|concours|a[-_]gagner|gagne[rz][-
 EXCLUDE_PATH = re.compile(r"reglement|conditions|cgu|mentions|gagnants|resultats|winners|rules|terms|privacy|"
                           r"fonction[-_]publique|recrutement|concours[-_](administratif|interne|externe|infirmier|enseignant)|"
                           r"\.(pdf|jpe?g|png|gif|webp|mp4|xml|gz)$", re.I)
-GENERIC_LAST = re.compile(r"^(jeux?[-_]?concours|concours|jeux|jeu|giveaway|index(\.\w+)?)$", re.I)
+GENERIC_LAST = re.compile(r"^(nos[-_])?(jeux?[-_]?concours|concours|jeux|jeu|giveaways?|index|tous[-_]les[-_](jeux|concours))$", re.I)
+CTA_TAIL = re.compile(r"\s*[-–|:]?\s*(je joue|je participe|jouer|participer|tenter ma chance|j'en profite|play|enter)\s*!?\s*$", re.I)
 
 
 def is_contest_url(url: str) -> bool:
@@ -35,9 +36,15 @@ def is_contest_url(url: str) -> bool:
     if not path or path == "/" or EXCLUDE_PATH.search(path):
         return False
     last = path.rstrip("/").rsplit("/", 1)[-1]
+    last = re.sub(r"\.(html?|php|aspx?)$", "", last)
+    last = re.sub(r"[-_]([a-z]|\d{1,3})$", "", last)  # suffixes de catégorie (« jeux-concours-c », « concours-2 »)
     if GENERIC_LAST.match(last):
         return False  # page d'index des concours : utile comme liste, pas comme concours
     return bool(CONTEST_PATH.search(path))
+
+
+def _bare(url: str) -> str:
+    return (urlsplit(url).hostname or "").lower().removeprefix("www.")
 
 
 def title_from_url(url: str) -> str:
@@ -72,7 +79,7 @@ class SiteConnector(Connector):
         budget = int(self.config.get("max_sitemaps", 4))
         while queue and budget > 0:
             sm = queue.pop(0)
-            if sm in seen_maps or sm.lower().endswith(".gz") or urlsplit(sm).hostname != urlsplit(root).hostname:
+            if sm in seen_maps or sm.lower().endswith(".gz") or _bare(sm) != _bare(root):
                 continue
             seen_maps.add(sm)
             budget -= 1
@@ -117,16 +124,21 @@ class SiteConnector(Connector):
                 if link and title and (KEYWORDS.search(title) or is_contest_url(link)):
                     out.setdefault(link, RawContest(title=title[:500], url=link, source_url=link, detail_url=link, language=self.source.language,
                                                     description=html_to_text(e.get("summary") or "")[:5000]))
-        host = urlsplit(res.url).hostname
         items, _ = HtmlListingConnector(self.source, self.fetcher).parse(res.text, res.url)
         for it in items:
-            if urlsplit(it.url).hostname == host and is_contest_url(it.url):
+            if _bare(it.url) == _bare(res.url) and is_contest_url(it.url):
+                it.title = CTA_TAIL.sub("", it.title).strip() or it.title
                 out.setdefault(it.url, it)
         return list(out.values())
 
+    note: str | None = None
+
     def discover(self) -> Iterator[RawContest]:
         items = [] if self.config.get("listing_url") else self._from_sitemaps()
+        how = "plan du site"
         if not items:
             items = self._from_pages()
-        self.source.last_status = f"{len(items)} page(s) de concours repérée(s)"
+            how = "page d'accueil" if not self.config.get("listing_url") else "page concours"
+        self.note = (f"ok : {len(items)} page(s) de jeu repérée(s) ({how})" if items else
+                     "ok mais aucune page de jeu repérée : indiquez la page concours du site (config listing_url)")
         yield from items[: int(self.config.get("max_items", 40))]
