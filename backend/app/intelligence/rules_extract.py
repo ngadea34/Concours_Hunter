@@ -425,7 +425,8 @@ ORG_PATTERNS = [
 SIREN_RX = re.compile(r"(?:rcs|siren|siret)\D{0,40}?(\d{3}\s?\d{3}\s?\d{3}(?:\s?\d{5})?)", re.I)
 SUSPICIOUS = [
     (r"(frais de (dossier|livraison|traitement|douane)|shipping fee|processing fee|handling fee).{0,60}(payer|regler|pay|verser|\d)", "frais demandés au gagnant"),
-    (r"(coordonnees bancaires|iban|numero de carte|card number|cvv|code secret)", "demande de données bancaires"),
+    # Un RIB peut être demandé légitimement pour verser un gain : seul compte un numéro de carte / code, ou un RIB lié à un paiement
+    (r"(numero de (carte|cb)|card number|cvv|cryptogramme|code secret)|(coordonnees bancaires|iban|rib)\b.{0,80}(payer|regler|frais|verser une somme|paiement)|(payer|regler|frais|paiement).{0,80}(coordonnees bancaires|iban|rib)\b", "demande de données bancaires"),
     (r"(partage|share|like|j.aime).{0,40}(gagne|win).{0,40}(iphone|ps5|\d{3,} ?€)", "giveaway réseau social type « partage pour gagner »"),
     (r"(urgent|dernier rappel|final notice|act now|derniere chance).{0,60}(gain|prize|lot)", "pression temporelle"),
     (r"(western union|moneygram|bitcoin|crypto|carte prepayee|pcs|transcash|neosurf)", "moyen de paiement à risque"),

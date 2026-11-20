@@ -210,7 +210,9 @@ def qualify(db: Session, contest: Contest, force: bool = False, source_trust: in
     contest.free_status, contest.fr_eligible = free_status, fr
 
     # --- signaux
-    flags = sorted(set(a["flags"]))
+    # drapeaux posés par l'exploration des pages (captcha, page inaccessible, enrichi) : conservés
+    persistent = {f for f in (contest.flags or []) if f in ("captcha", "page_inaccessible", "enriched", "login_required")}
+    flags = sorted(set(a["flags"]) | persistent)
     contest.flags = flags
     suspicious = list(a["suspicious_signals"])
     if "prompt_injection" in flags:

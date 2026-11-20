@@ -179,3 +179,31 @@ def test_seed_retires_excluded_sources(db):
     jcb = db.query(Source).filter_by(kind="aggregator:jeu-concours-biz").one()
     assert not jcb.enabled and "Exclu" in jcb.last_status
     assert db.query(Source).filter_by(kind="aggregator:lddj").one().url.endswith("nouveaux-jeux-concours.html")
+
+
+def test_enrich_backlog_and_flags_kept(db):
+    from app.discovery.pipeline import enrich_backlog
+
+    s = Source(name="Agg", kind="html", url="https://agg.test/", trust=70,
+               config={"item": "article.concours", "title": "h2", "end_date": ".date", "max_pages": 1})
+    db.add(s)
+    db.commit()
+    job = run_scan(db, s, fetcher(), max_enrich=0)  # aucun enrichissement pendant le scan
+    assert job.new == 2
+    ps5 = db.query(Contest).filter(Contest.title.like("%PlayStation%")).one()
+    assert not any(r.origin == "fetched" for r in ps5.rules)
+    n = enrich_backlog(db, fetcher(), limit=5)
+    assert n == 2
+    db.refresh(ps5)
+    assert any(r.origin == "fetched" for r in ps5.rules) and ps5.status == "qualified"
+    assert "enriched" in ps5.flags  # conservé après requalification
+    assert enrich_backlog(db, fetcher(), limit=5) == 0  # pas de seconde visite
+
+
+def test_rib_for_cash_prize_is_not_scam():
+    from app.intelligence.rules_extract import analyze_rules
+
+    a = analyze_rules("Le gagnant recevra 500 € par virement et devra transmettre ses coordonnées bancaires (RIB) à l'organisateur.")
+    assert "demande de données bancaires" not in a.suspicious_signals
+    b = analyze_rules("Pour recevoir le lot, payez les frais de 2 € en indiquant votre numéro de carte bancaire.")
+    assert "demande de données bancaires" in b.suspicious_signals
