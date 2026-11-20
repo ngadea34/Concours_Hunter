@@ -130,6 +130,7 @@ def verify_answers_against_page(db: Session, contest: Contest, page_text: str) -
 def enrich(db: Session, fetcher: Fetcher, contest: Contest, raw: RawContest, source: Source | None) -> None:
     """Lit la fiche (agrégateur) puis la page organisateur et son règlement, si autorisé."""
     page_url = raw.detail_url or contest.url
+    contest.flags = sorted(set(contest.flags or []) | {"enriched"})
     try:
         res = fetcher.get(page_url)
     except (FetchBlocked, Exception) as e:  # noqa: BLE001
@@ -205,7 +206,8 @@ def run_scan(db: Session, source: Source, fetcher: Fetcher | None = None, max_en
             contest, created = upsert(db, source, raw)
             if created:
                 job.new += 1
-            if (created or not contest.rules) and enriched < max_enrich:
+            has_rules = any(r.origin in ("fetched", "user") for r in contest.rules)
+            if not has_rules and "enriched" not in (contest.flags or []) and enriched < max_enrich:
                 enrich(db, fetcher, contest, raw, source)
                 enriched += 1
             if created or contest.status in ("new", "to_verify"):
@@ -251,3 +253,30 @@ def add_contest_by_url(db: Session, url: str, title: str | None, fetcher: Fetche
     qualify(db, contest)
     db.commit()
     return contest
+
+
+def enrich_backlog(db: Session, fetcher: Fetcher, limit: int = 20) -> int:
+    """Complète progressivement les concours encore sans règlement (pas seulement ceux du dernier scan)."""
+    from sqlalchemy import or_
+
+    today = date.today()
+    n = 0
+    cands = db.scalars(select(Contest).where(Contest.status.in_(("new", "to_verify")), Contest.merged_into_id.is_(None),
+                                             or_(Contest.end_date.is_(None), Contest.end_date >= today))
+                       .order_by(Contest.end_date.asc().nulls_last()).limit(limit * 5))
+    for c in cands:
+        if n >= limit or fetcher.stopped.is_set():
+            break
+        if "enriched" in (c.flags or []) or any(r.origin in ("fetched", "user") for r in c.rules):
+            continue
+        detail = c.sightings[0].source_url if c.sightings else c.url
+        raw = RawContest(title=c.title, url=c.url, source_url=detail, detail_url=detail)
+        try:
+            enrich(db, fetcher, c, raw, c.sightings[0].source if c.sightings else None)
+            qualify(db, c)
+            db.commit()
+        except FetchBlocked:
+            db.rollback()
+            break
+        n += 1
+    return n

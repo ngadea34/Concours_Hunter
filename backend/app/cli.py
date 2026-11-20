@@ -18,6 +18,8 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("token", help="affiche le jeton d'accès (smartphone / extension)")
     sub.add_parser("doctor", help="diagnostic")
     sub.add_parser("demo-data", help="ajoute des concours de DÉMONSTRATION (fictifs, marqués [DÉMO])")
+    en = sub.add_parser("enrich", help="cherche les règlements manquants (N concours max)")
+    en.add_argument("limit", type=int, nargs="?", default=20)
     sc = sub.add_parser("scan", help="scanne une source par id")
     sc.add_argument("source_id", type=int)
     a = ap.parse_args(argv)
@@ -57,6 +59,16 @@ def main(argv: list[str] | None = None) -> int:
 
         with session_scope() as db:
             print(f"{load_demo(db)} concours de démonstration ajoutés")
+    elif a.cmd == "enrich":
+        from .discovery.fetcher import Fetcher
+        from .discovery.pipeline import enrich_backlog
+
+        f = Fetcher()
+        try:
+            with session_scope() as db:
+                print(json.dumps({"enriched": enrich_backlog(db, f, limit=a.limit)}))
+        finally:
+            f.close()
     elif a.cmd == "scan":
         from .db.models import Source
         from .discovery.pipeline import run_scan

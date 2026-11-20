@@ -14,7 +14,7 @@ from ..audit import audit
 from ..db.models import Contest, Participation, ScanJob, Source, utcnow
 from ..db.session import session_scope
 from ..discovery.fetcher import Fetcher
-from ..discovery.pipeline import run_scan
+from ..discovery.pipeline import enrich_backlog, run_scan
 from ..notifications.service import notify
 from ..rewards.service import check_deadlines
 
@@ -58,6 +58,8 @@ class Runner:
                     if s.last_scan_at and s.last_scan_at > due_before:
                         continue
                     run_scan(db, s, self.fetcher)
+                if not self.paused and not self.fetcher.stopped.is_set():
+                    enrich_backlog(db, self.fetcher, limit=20)
             finally:
                 self.fetcher.close()
                 self.fetcher = None
