@@ -25,7 +25,13 @@ Dépôt : https://github.com/ngadea34/concours_hunter — `main` = phase 0 ; bra
 - Enrichissement de 30 concours : 157 s, 7 règlements récupérés, 2 qualifiés, 125 à vérifier, 1 expiré.
 - Constat : la plupart des concours restent « à vérifier » faute de règlement accessible (beaucoup de concours sur réseaux sociaux sans règlement en ligne). C'est voulu : aucune décision de gratuité/éligibilité sans preuve.
 
+## Agrégateur maison (v0.2, décision D13)
+- Connecteur `site` : lit les sitemaps (robots.txt ou /sitemap.xml), sinon le flux RSS et les liens « concours » de la page d'accueil ou de `config.listing_url`. Écarte règlements, listes de gagnants, concours administratifs, pages d'index, pages de plus de 120 jours. Titre réel lu sur la page (og:title / h1).
+- Suggestions (Sources > « Sites d'organisateurs à surveiller ») : domaines des concours déjà trouvés, hors réseaux sociaux, formulaires, raccourcisseurs, agrégateurs et sites exclus.
+- Sources `site` scannées une fois par jour (config `interval_minutes` pour changer).
+- Type de jeu `game_type` (migration v2 avec classement des concours existants), filtre catalogue et badge.
+
 ## Reste à faire
-1. Trouver d'autres sources autorisées (RSS de médias/marques) : aucune des 3 sources joignables n'a de RSS.
+1. Faire grandir l'agrégateur maison : suivre les sites suggérés (Sources), et en ajouter à la main.
 2. Jeu-concours.biz : seulement avec autorisation écrite d'EKOJEU (démarche de Nico).
 3. Optionnel : notifications hors application (e-mail / ntfy), connecteur « pages gagnants ».

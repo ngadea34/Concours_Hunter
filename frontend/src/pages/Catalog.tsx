@@ -9,7 +9,7 @@ import { Pagination } from '../components/Pagination';
 import { useToast } from '../components/Toast';
 import { useAsync } from '../hooks';
 import { useI18n } from '../i18n';
-import { CONTEST_STATUSES, FREE_STATUSES, PRIZE_CATEGORIES, TRI_STATES, type ContestQuery } from '../types';
+import { CONTEST_STATUSES, FREE_STATUSES, GAME_TYPES, PRIZE_CATEGORIES, TRI_STATES, type ContestQuery } from '../types';
 import { emptyToUndef } from '../util';
 
 const PAGE_SIZE = 12;
@@ -35,7 +35,7 @@ export function Catalog() {
   };
   const page = Math.max(1, Number(get('page')) || 1);
   const query: ContestQuery = {
-    q: emptyToUndef(get('q')), status: get('status') || undefined, category: get('category') || undefined,
+    q: emptyToUndef(get('q')), status: get('status') || undefined, category: get('category') || undefined, game_type: get('game_type') || undefined,
     free_status: get('free_status') || undefined, fr_eligible: get('fr_eligible') || undefined,
     closing_within_days: get('closing') ? Number(get('closing')) : undefined,
     min_reliability: get('minrel') ? Number(get('minrel')) : undefined,
@@ -83,6 +83,7 @@ export function Catalog() {
         </div>
         <div id="adv-filters" className={showAdv ? 'adv-filters' : 'adv-filters adv-hidden'}>
         {sel('f-status', t('common.status'), 'status', CONTEST_STATUSES.map((v) => ({ v, l: t(`status.${v}`) })))}
+        {sel('f-game', t('cat.gameType'), 'game_type', GAME_TYPES.map((v) => ({ v, l: t(`game.${v}`) })))}
         {sel('f-cat', t('cat.category'), 'category', PRIZE_CATEGORIES.map((v) => ({ v, l: t(`prize.${v}`) })))}
         {sel('f-free', t('cat.free'), 'free_status', FREE_STATUSES.map((v) => ({ v, l: t(`free.${v}`) })))}
         {sel('f-fr', t('cat.fr'), 'fr_eligible', TRI_STATES.map((v) => ({ v, l: t(`tri.${v}`) })))}

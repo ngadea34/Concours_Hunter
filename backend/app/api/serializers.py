@@ -16,7 +16,7 @@ def contest_summary(c: Contest) -> dict:
         "id": c.id, "title": c.title, "url": c.url,
         "organizer_name": c.organizer.name if c.organizer else None,
         "source_names": sorted({s.source.name for s in c.sightings if s.source}),
-        "status": c.status, "category": c.category, "prize_summary": c.prize_summary,
+        "status": c.status, "category": c.category, "game_type": c.game_type, "prize_summary": c.prize_summary,
         "total_prize_value_eur": c.total_prize_value_eur, "end_date": _iso(c.end_date),
         "days_left": (c.end_date - today).days if c.end_date else None, "language": c.language,
         "countries_allowed": c.eligibility.countries_allowed if c.eligibility else [],

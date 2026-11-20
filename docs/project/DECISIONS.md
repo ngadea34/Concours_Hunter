@@ -13,4 +13,5 @@
 | D9 | 2026-11-20 | Jeu-concours.biz exclu (policy.py) | Mentions légales : extraction automatisée et outils de participation automatisée interdits sans autorisation écrite d'EKOJEU | L2 |
 | D10 | 2026-11-20 | ToutGagner exclu | Organisateur/règlement/réponses réservés aux abonnés, reproduction interdite | L2 |
 | D11 | 2026-11-20 | Concours du Net retiré | Domaine inexistant en DNS | L2 |
+| D13 | 2026-11-20 | Agrégateur maison sur sources primaires : connecteur `site` (sitemaps + RSS + page concours du site organisateur), suggestions de sites à suivre tirées des concours déjà trouvés, type de jeu. On reprend l'organisation des agrégateurs (types de jeux, filtres, clôture proche), jamais leur contenu ; Jeu-concours.biz et ToutGagner ne sont ni lus ni rétro-analysés | Les CGU de ces deux sites interdisent l'extraction ; les pages des marques sont publiques et lues au rythme de robots.txt, une fois par jour | L2 |
 | D12 | 2026-11-20 | LDDJ seul agrégateur actif, sans /toconc.php ; URL organisateur déduite de l'attribut de suivi si l'hôte correspond | robots.txt interdit /toconc.php ; aucune clause anti-extraction | L2 |

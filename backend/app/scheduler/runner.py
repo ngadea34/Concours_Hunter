@@ -55,7 +55,10 @@ class Runner:
                 for s in sources:
                     if self.paused or self.fetcher.stopped.is_set():
                         break
-                    if s.last_scan_at and s.last_scan_at > due_before:
+                    # sites d'organisateurs : une visite par jour suffit (ils publient peu de jeux)
+                    every = (s.config or {}).get("interval_minutes") or (1440 if s.kind == "site" else None)
+                    due = utcnow() - timedelta(minutes=int(every)) if every else due_before
+                    if s.last_scan_at and s.last_scan_at > due:
                         continue
                     run_scan(db, s, self.fetcher)
                 if not self.paused and not self.fetcher.stopped.is_set():

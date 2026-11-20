@@ -145,3 +145,7 @@ legend { font-weight: 700; padding: 0 .4rem; }
 .adv-filters { display: contents; }
 .filters-toggle { display: none; }
 @media (max-width: 767px) { .filters-toggle { display: block; } .adv-hidden { display: none; } }
+
+.list { list-style: none; padding: 0; margin: 0 0 1rem; }
+.list > li { padding: .6rem 0; border-bottom: 1px solid var(--border); }
+.list > li:last-child { border-bottom: 0; }

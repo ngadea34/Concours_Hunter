@@ -89,6 +89,7 @@ class Contest(Base, TimestampMixin):
     end_date: Mapped[date | None] = mapped_column(Date, index=True)
     entry_limit: Mapped[str | None] = mapped_column(String(200))
     entry_method: Mapped[str | None] = mapped_column(String(50))  # form, social, email, sms, mail, instant
+    game_type: Mapped[str | None] = mapped_column(String(20), index=True)  # instant_win, creative, quiz, social, draw
     free_status: Mapped[str] = mapped_column(String(20), default="unknown")
     fr_eligible: Mapped[str] = mapped_column(String(10), default="unknown")
     participation_mode: Mapped[str] = mapped_column(String(10), default="manual")
