@@ -5,7 +5,7 @@ Audit réel du 2026-11-20 (depuis le PC de l'utilisateur, lecture seule) :
   (redirection vers l'organisateur) → jamais suivi par le robot. Connecteur ci-dessous calé sur la vraie structure.
 - Jeu-concours.biz : extraction automatisée interdite par les mentions légales → exclu (policy.py).
 - ToutGagner : données clés réservées aux abonnés, reproduction interdite → exclu (policy.py).
-- Concours du Net (concoursdunet.com) : domaine inexistant en DNS → retiré.
+- Concours du Net : concoursdunet.com inexistant ; le vrai site concours-du-net.com interdit toute exploitation sans accord écrit → consultation assistée (policy.py).
 """
 from __future__ import annotations
 
@@ -46,8 +46,9 @@ def organizer_guess(onclick: str | None, name: str | None) -> str | None:
 class LeDemonDuJeu(HtmlListingConnector):
     kind = "aggregator:lddj"
     description = "Le Démon du Jeu (LDDJ) : liste quotidienne des nouveaux concours."
-    tos_note = ("Pas de clause anti-extraction dans les mentions légales (vérifié le 2026-11-20). robots.txt respecté : "
-                "/toconc.php n'est jamais appelé par le robot. Cadence limitée, usage personnel.")
+    tos_note = ("Audit du 2026-11-20 : pas de CGU écrites, mais même réseau que Jeu-concours.biz (Reflexe Media), dont les CGU interdisent "
+                "l'extraction. Lecture automatique suspendue tant qu'aucune autorisation écrite n'est enregistrée dans Réglages ; "
+                "le connecteur respecte robots.txt (/toconc.php jamais appelé).")
     default_config = {"max_items": 200}
 
     def parse(self, html: str, base_url: str) -> tuple[list[RawContest], str | None]:

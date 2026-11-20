@@ -21,6 +21,7 @@ extension MV3 ──localhost + jeton──────────────�
 
 ## Principes
 - **Connecteurs = plugins** : une classe `Connector` par type (RSS, HTML générique, agrégateur). Les sources sont des lignes en base (`sources`) ; ajouter une source RSS/HTML ne touche pas au cœur. Un nouveau type = un fichier dans `discovery/connectors/` enregistré par décorateur.
+- **Multisource** : chaque source a son connecteur et son mode d'accès (`discovery/policy.py` : API officielle, flux autorisé, données sous licence, source publique réutilisable, import utilisateur, import par partage navigateur, consultation assistée, référence externe). Une source en erreur est isolée, les autres continuent. Les sites dont l'extraction automatisée est interdite par contrat (catégorie 6) restent utiles en consultation assistée : l'utilisateur ouvre le site, puis ajoute la page de l'organisateur. Aucune copie d'une base protégée.
 - **Respect des sites** : `robots.txt` vérifié avant chaque requête, User-Agent honnête, délai minimal par domaine, cache HTTP (ETag/Last-Modified + hash du contenu). Aucun contournement de CAPTCHA, login, paywall ou géoblocage : ces cas sont marqués `needs_human`.
 - **Décisions justifiées** : chaque champ qualifié porte `evidence` (extrait littéral) et `method` (`rule`, `llm:<modèle>`, `human`). Une décision critique sans preuve → statut `to_verify`.
 - **Cache d'analyse** : `contest_rules.content_hash` (SHA-256 du texte normalisé). Analyse réutilisée tant que le hash ne change pas ; changement → réanalyse + notification.
@@ -44,3 +45,6 @@ Voir `backend/app/db/models.py`.
 - **Décisions reportées d'une semaine à l'autre** : refusé reste refusé, reporté revient à sa date, favori conservé.
 - **Tâches** : générées avec une clé unique (`auto_key`) depuis les participations acceptées, les opportunités suivies, les résultats, les réclamations et les promotions ; échéance recalculée sur les données réelles sauf si l'utilisateur l'a modifiée ; expiration automatique.
 - **Notifications** : clé de dédoublonnage incluant la date de clôture (une date modifiée → nouveau rappel). Alertes urgentes immédiates ; rappels non urgents groupés dans la synthèse quotidienne.
+
+## Indice d'automatisabilité et difficulté
+`intelligence/automatability.py` classe chaque concours : A1 formulaire web, A2 quiz, A3 e-mail, A4 réseau social, A5 créatif, A6 action humaine (CAPTCHA, compte, courrier, SMS, magasin), A7 achat, A8 impossible ou non vérifiable. Ordre de priorité des règles : A8, A7, A5, A4, A6, A3, A2, A1. Difficulté 1 à 5 = base de la classe + CAPTCHA / connexion / courrier. L'indice ne déclenche jamais seul une participation automatique : la politique d'automatisation reste prioritaire.

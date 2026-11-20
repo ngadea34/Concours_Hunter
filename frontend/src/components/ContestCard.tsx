@@ -16,6 +16,7 @@ export function ContestBadges({ c }: { c: ContestSummary }) {
       <Badge tone={freeTone[c.free_status]}>{t(`free.${c.free_status}`)}</Badge>
       <Badge tone={eligTone[c.fr_eligible]}>{t(`elig.${c.fr_eligible}`)}</Badge>
       {c.game_type && <Badge>{t(`game.${c.game_type}`)}</Badge>}
+      {c.automation_class && <Badge tone={c.automation_class <= 'A2' ? 'ok' : c.automation_class >= 'A7' ? 'warn' : 'neutral'}>{t(`auto.${c.automation_class}`)}{c.difficulty ? ` · ${t('auto.diff')} ${c.difficulty}/5` : ''}</Badge>}
       {c.category && <Badge>{t(`prize.${c.category}`)}</Badge>}
       {c.participated && <Badge tone="info">{t('cat.participated')}</Badge>}
     </div>

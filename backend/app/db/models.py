@@ -90,6 +90,9 @@ class Contest(Base, TimestampMixin):
     entry_limit: Mapped[str | None] = mapped_column(String(200))
     entry_method: Mapped[str | None] = mapped_column(String(50))  # form, social, email, sms, mail, instant
     game_type: Mapped[str | None] = mapped_column(String(20), index=True)  # instant_win, creative, quiz, social, draw
+    automation_class: Mapped[str | None] = mapped_column(String(2), index=True)  # A1..A8 (intelligence/automatability.py)
+    difficulty: Mapped[int | None] = mapped_column(Integer)  # 1 (très facile) à 5 (très difficile)
+    social_platform: Mapped[str | None] = mapped_column(String(12))  # facebook, instagram, tiktok, x, youtube
     free_status: Mapped[str] = mapped_column(String(20), default="unknown")
     fr_eligible: Mapped[str] = mapped_column(String(10), default="unknown")
     participation_mode: Mapped[str] = mapped_column(String(10), default="manual")

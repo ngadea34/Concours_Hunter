@@ -48,7 +48,10 @@ class Runner:
         with session_scope() as db:
             settings = get_settings_dict(db)
             due_before = utcnow() - timedelta(minutes=settings["scan_interval_minutes"])
-            sources = db.scalars(select(Source).where(Source.enabled.is_(True))).all()
+            from ..discovery.policy import denial_reason
+
+            # une source en consultation assistée n'est jamais lue automatiquement, même activée par erreur
+            sources = [s for s in db.scalars(select(Source).where(Source.enabled.is_(True))).all() if not denial_reason(s.url)]
             self.fetcher = Fetcher(max_per_hour=settings["max_requests_per_domain_per_hour"])
             try:
                 for s in sources:
@@ -59,7 +62,11 @@ class Runner:
                     due = utcnow() - timedelta(minutes=int(every)) if every else due_before
                     if s.last_scan_at and s.last_scan_at > due:
                         continue
-                    run_scan(db, s, self.fetcher)
+                    try:
+                        run_scan(db, s, self.fetcher)
+                    except Exception:  # noqa: BLE001 - une source en panne ne bloque jamais les autres
+                        log.exception("Source %s isolée après erreur", s.name)
+                        db.rollback()
                 if not self.paused and not self.fetcher.stopped.is_set():
                     enrich_backlog(db, self.fetcher, limit=20)
             finally:

@@ -1,29 +1,122 @@
 {
-  "extName": { "message": "Concours Hunter" },
-  "extDescription": { "message": "Pre-fills contest forms prepared in Concours Hunter. Never submits for you." },
-  "optionsTitle": { "message": "Concours Hunter settings" },
-  "serverUrl": { "message": "Server URL" },
-  "token": { "message": "Token (X-CH-Token, optional)" },
-  "save": { "message": "Save" },
-  "test": { "message": "Test connection" },
-  "saved": { "message": "Settings saved." },
-  "permDenied": { "message": "Permission to access this server was denied." },
-  "connOk": { "message": "Connection successful." },
-  "connFail": { "message": "Connection failed: $1", "placeholders": { "1": { "content": "$1" } } },
-  "needsToken": { "message": "The server requires a token." },
-  "settings": { "message": "Settings" },
-  "loading": { "message": "Loading…" },
-  "unsupportedPage": { "message": "This page cannot be analysed (use an http/https tab)." },
-  "noneForPage": { "message": "No prepared participation for this page, prepare it in Concours Hunter." },
-  "serverError": { "message": "Server unreachable or error: $1", "placeholders": { "1": { "content": "$1" } } },
-  "prefill": { "message": "Pre-fill" },
-  "submittedBtn": { "message": "I submitted" },
-  "captchaWarn": { "message": "CAPTCHA detected: you must solve it yourself" },
-  "prefillResult": { "message": "$1 field(s) filled (green), $2 unrecognised required (orange). Review, tick consents yourself, then submit manually.", "placeholders": { "1": { "content": "$1" }, "2": { "content": "$2" } } },
-  "prefillWarnings": { "message": "Warnings: $1", "placeholders": { "1": { "content": "$1" } } },
-  "proofSaved": { "message": "Screenshot saved and participation marked as submitted." },
-  "submitFail": { "message": "Failed: $1", "placeholders": { "1": { "content": "$1" } } },
-  "neverSubmits": { "message": "The extension never submits the form: you do it." },
-  "status_prepared": { "message": "prepared" },
-  "status_awaiting_human": { "message": "awaiting you" }
+  "extName": {
+    "message": "Concours Hunter"
+  },
+  "extDescription": {
+    "message": "Pre-fills contest forms prepared in Concours Hunter. Never submits for you."
+  },
+  "optionsTitle": {
+    "message": "Concours Hunter settings"
+  },
+  "serverUrl": {
+    "message": "Server URL"
+  },
+  "token": {
+    "message": "Token (X-CH-Token, optional)"
+  },
+  "save": {
+    "message": "Save"
+  },
+  "test": {
+    "message": "Test connection"
+  },
+  "saved": {
+    "message": "Settings saved."
+  },
+  "permDenied": {
+    "message": "Permission to access this server was denied."
+  },
+  "connOk": {
+    "message": "Connection successful."
+  },
+  "connFail": {
+    "message": "Connection failed: $1",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "needsToken": {
+    "message": "The server requires a token."
+  },
+  "settings": {
+    "message": "Settings"
+  },
+  "loading": {
+    "message": "Loading…"
+  },
+  "unsupportedPage": {
+    "message": "This page cannot be analysed (use an http/https tab)."
+  },
+  "noneForPage": {
+    "message": "No prepared participation for this page, prepare it in Concours Hunter."
+  },
+  "serverError": {
+    "message": "Server unreachable or error: $1",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "prefill": {
+    "message": "Pre-fill"
+  },
+  "submittedBtn": {
+    "message": "I submitted"
+  },
+  "captchaWarn": {
+    "message": "CAPTCHA detected: you must solve it yourself"
+  },
+  "prefillResult": {
+    "message": "$1 field(s) filled (green), $2 unrecognised required (orange). Review, tick consents yourself, then submit manually.",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      }
+    }
+  },
+  "prefillWarnings": {
+    "message": "Warnings: $1",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "proofSaved": {
+    "message": "Screenshot saved and participation marked as submitted."
+  },
+  "submitFail": {
+    "message": "Failed: $1",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "neverSubmits": {
+    "message": "The extension never submits the form: you do it."
+  },
+  "status_prepared": {
+    "message": "prepared"
+  },
+  "status_awaiting_human": {
+    "message": "awaiting you"
+  },
+  "addPage": {
+    "message": "Add this page to Concours Hunter"
+  },
+  "pageAdded": {
+    "message": "Added: $1. The rules will be read on the next pass.",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  }
 }

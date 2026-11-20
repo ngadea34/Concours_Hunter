@@ -481,6 +481,17 @@ function Settings({ onSaved }: { onSaved: () => void }) {
               ))}
             </div></fieldset>
             {bool('daily_enabled')}{bool('notifications_enabled')}{bool('remind_results')}{bool('remind_claims')}
+            <fieldset><legend>{t('wk.p.filters')}</legend>
+              <div className="form-grid">
+                <div className="field wide"><label htmlFor="wp-am">{t('wk.p.automation_mode')}</label>
+                  <select id="wp-am" value={val.automation_mode} onChange={(e) => setDraft({ ...draft, automation_mode: e.target.value as WeekPrefs['automation_mode'] })}>
+                    {(['max', 'mixed', 'manual'] as const).map((m) => <option key={m} value={m}>{t(`wk.p.mode.${m}`)}</option>)}
+                  </select></div>
+                {num('social_share_max', 0, 100)}
+              </div>
+              {bool('hide_facebook')}{bool('hide_instagram')}{bool('hide_creative')}
+              {bool('favor_quick_forms')}{bool('favor_instant_win')}{bool('favor_quiz')}{bool('favor_many_prizes')}
+            </fieldset>
             <button className="btn btn-primary">{t('common.save')}</button>
           </form>
         );

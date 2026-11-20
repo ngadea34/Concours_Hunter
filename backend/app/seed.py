@@ -11,7 +11,7 @@ SEED = [
 RETIRED = {  # sources des versions précédentes, désactivées définitivement (non supprimées)
     "aggregator:jeu-concours-biz": "Exclu : extraction automatisée interdite par les mentions légales du site",
     "aggregator:toutgagner": "Exclu : contenu réservé aux abonnés, reproduction interdite",
-    "aggregator:concoursdunet": "Retiré : domaine inexistant",
+    "aggregator:concoursdunet": "Retiré : concoursdunet.com inexistant ; concours-du-net.com interdit l'exploitation sans accord écrit (consultation assistée)",
 }
 
 
@@ -27,6 +27,9 @@ def seed(db: Session) -> None:
     if old:
         old.url = SEED[0][2]
     for name, kind, url, lang, country, trust in SEED:
-        if not db.scalars(select(Source).where(Source.url == url)).first():
+        existing = db.scalars(select(Source).where(Source.url == url)).first()
+        if existing:
+            existing.tos_note = reg[kind].tos_note  # note CGU tenue à jour (audit des sources)
+        else:
             db.add(Source(name=name, kind=kind, url=url, language=lang, country=country, enabled=False, trust=trust, tos_note=reg[kind].tos_note))
     db.commit()

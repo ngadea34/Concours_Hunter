@@ -272,6 +272,9 @@ def qualify(db: Session, contest: Contest, force: bool = False, source_trust: in
         prizes=pz, category_weight=cat_w, personal=contest.personal_interest, entry_method=contest.entry_method, flags=flags,
         winners=winners, fees=any(p["fees"] for p in pz), delivery_fr=fr == "yes", total_value_eur=contest.total_prize_value_eur)
     contest.score_breakdown = {"reliability": rb, "interest": ib}
+    from .automatability import apply as apply_automatability
+
+    apply_automatability(contest, rule.text if rule is not None else "")
 
     # --- statut
     today = date.today()

@@ -13,11 +13,11 @@ Ce que l'application fait : elle lit des pages publiques, analyse les règlement
    - **Participation automatique** : l'application peut soumettre seule un formulaire, uniquement si le règlement l'autorise clairement, sans CAPTCHA ni connexion. Décochée par défaut.
    - **Conservation des preuves** : l'application garde des captures d'écran de vos participations.
    - **Notifications par e-mail** : consentement enregistré, mais l'envoi d'e-mails n'est pas encore disponible dans cette version (notifications dans l'application uniquement).
-4. Ouvrez **Sources**. La source Le Démon du Jeu est **désactivée** à l'installation : lisez sa note puis activez-la.
+4. Ouvrez **Sources**. Le Démon du Jeu est en consultation assistée depuis la version 0.4 (voir 1 bis) : sa lecture automatique ne reprend qu'avec un accord écrit de l'éditeur.
 5. Avant d'activer une source, lisez sa **note sur les CGU** (conditions générales d'utilisation du site). Si les CGU interdisent la collecte automatisée, ne l'activez pas.
 6. Activez ensuite les sources que vous acceptez. Le planificateur les parcourt automatiquement.
 
-Jeu-concours.biz et ToutGagner sont exclus : leurs conditions d'utilisation interdisent la collecte automatique ou réservent le contenu aux abonnés. Concours du Net n'existe plus. Le robot ne suit jamais le lien « Voir le concours » de Le Démon du Jeu (interdit par son robots.txt) : vous pouvez, vous, cliquer dessus depuis la fiche.
+Jeu-concours.biz, ToutGagner, Concours du Net (concours-du-net.com) et Le Démon du Jeu ne sont jamais lus automatiquement sans accord écrit de leur éditeur. Ils restent accessibles en consultation assistée (voir 1 bis).
 
 ## 1 bis. Votre agrégateur : surveiller les sites des marques
 
@@ -25,7 +25,15 @@ L'application ne dépend pas d'un seul site agrégateur. Dans **Sources**, la ru
 
 Dans le **Catalogue**, le filtre **Type de jeu** trie les concours comme sur les sites spécialisés : tirage au sort, instant gagnant, quiz, créatif (photo, recette…), réseaux sociaux. Le type n'est affiché que lorsqu'il est établi par le texte du concours.
 
-Jeu-concours.biz et ToutGagner ne sont pas lus par l'application : leurs conditions d'utilisation l'interdisent. Vous pouvez les consulter vous-même et ajouter un concours qui vous intéresse avec l'extension, depuis la page de l'organisateur.
+**Consultation assistée (Jeu-concours.biz, ToutGagner, Concours du Net, Le Démon du Jeu).** Leurs conditions d'utilisation interdisent la lecture automatique : l'application ne les lit pas. Dans **Sources**, rubrique « Consultation assistée », le bouton **Ouvrir le site** vous y emmène. Quand un concours vous plaît, suivez son lien vers le site de l'organisateur, puis cliquez sur **Ajouter cette page à Concours Hunter** dans l'extension (ou collez l'adresse dans « Importer des concours »). Le Démon du Jeu n'a pas de CGU, mais il appartient au même réseau que Jeu-concours.biz : par prudence, il est traité de la même façon.
+
+Si un éditeur vous donne un accord écrit, saisissez-le dans **Réglages > Autorisations écrites des éditeurs** (site, date, référence) : la lecture automatique de ce site reprend, toujours dans le respect de son robots.txt.
+
+**Importer des concours.** Dans **Sources**, collez une adresse par ligne (vous pouvez ajouter le titre et la date de fin) ou un CSV avec les colonnes `url ; titre ; fin ; lot ; organisateur`. Les doublons sont reconnus.
+
+**Contrôle qualité.** Sur chaque source, le bouton **Contrôle qualité** indique la part de concours avec lien officiel, règlement, date de clôture et lot, et signale les points à surveiller.
+
+**Facilité de participation (A1 à A8).** Chaque concours porte une étiquette : A1 formulaire web, A2 quiz, A3 par e-mail, A4 réseau social, A5 créatif, A6 action humaine (CAPTCHA, compte, courrier, magasin), A7 achat, A8 impossible à vérifier, avec une difficulté de 1 à 5. Le **Catalogue** peut filtrer par étiquette. Dans **Ma semaine > Réglages**, rubrique « Sélection des concours », choisissez l'automatisation maximale, mixte ou les participations manuelles, masquez Facebook, Instagram ou les concours créatifs, et favorisez formulaires rapides, instants gagnants, quiz ou concours à nombreux lots.
 
 ## 1 ter. Ma semaine : votre programme
 

@@ -75,11 +75,39 @@ def _m004_weekly(conn: Connection) -> None:
     Base.metadata.create_all(conn, tables=[Base.metadata.tables[n] for n in names])
 
 
+def _m005_automatability(conn: Connection) -> None:
+    """Indice d'automatisabilité A1 à A8, difficulté et plateforme sociale, calculés pour les concours existants."""
+    import json
+
+    from ..intelligence.automatability import classify
+
+    cols = {r[1] for r in conn.execute(text("PRAGMA table_info(contests)"))}
+    for name, typ in (("automation_class", "VARCHAR(2)"), ("difficulty", "INTEGER"), ("social_platform", "VARCHAR(12)")):
+        if name not in cols:
+            conn.execute(text(f"ALTER TABLE contests ADD COLUMN {name} {typ}"))
+    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_contests_automation_class ON contests (automation_class)"))
+    rows = conn.execute(text(
+        "SELECT c.id, c.title, c.description, c.url, c.flags, c.game_type, c.entry_method, c.free_status, c.fr_eligible, "
+        "(SELECT r.text FROM contest_rules r WHERE r.contest_id = c.id ORDER BY r.id DESC LIMIT 1), "
+        "(SELECT COUNT(*) FROM contest_rules r WHERE r.contest_id = c.id AND r.origin IN ('fetched','user')), "
+        "(SELECT COUNT(*) FROM answers a WHERE a.contest_id = c.id) FROM contests c")).all()
+    for cid, title, desc, url, flags, gt, em, fs, fr, rtext, nrules, nans in rows:
+        try:
+            fl = json.loads(flags) if isinstance(flags, str) else (flags or [])
+        except ValueError:
+            fl = []
+        r = classify(url=url, text=" ".join(filter(None, [title, desc, rtext])), game_type=gt, entry_method=em, flags=fl,
+                     free_status=fs or "unknown", fr_eligible=fr or "unknown", has_rules=bool(nrules), has_answers=bool(nans))
+        conn.execute(text("UPDATE contests SET automation_class = :a, difficulty = :d, social_platform = :p WHERE id = :i"),
+                     {"a": r["class"], "d": r["difficulty"], "p": r["platform"], "i": cid})
+
+
 MIGRATIONS: list[tuple[int, str, Callable[[Connection], None]]] = [
     (1, "schéma initial", _m001_initial),
     (2, "type de jeu (tirage, instant gagnant, quiz...)", _m002_game_type),
     (3, "corrections du premier essai des sites d'organisateurs", _m003_fix_site_contests),
     (4, "programme de la semaine (M15) et suivi des promotions", _m004_weekly),
+    (5, "indice d'automatisabilité A1 à A8 et difficulté", _m005_automatability),
 ]
 
 LATEST = MIGRATIONS[-1][0]

@@ -67,6 +67,7 @@ SORTS = {"end_date": Contest.end_date.asc().nulls_last(), "-interest": Contest.i
 
 @router.get("/contests")
 def list_contests(q: str | None = None, status: str | None = None, category: str | None = None, game_type: str | None = None, free_status: str | None = None,
+                  automation_class: str | None = None, max_difficulty: int | None = None, hide_platforms: str | None = None,
                   fr_eligible: str | None = None, closing_within_days: int | None = None, min_reliability: int | None = None,
                   sort: str = "-interest", page: int = Query(1, ge=1), page_size: int = Query(24, ge=1, le=100), db: Session = Depends(get_db)) -> dict:
     stmt = select(Contest).where(Contest.merged_into_id.is_(None))
@@ -83,6 +84,12 @@ def list_contests(q: str | None = None, status: str | None = None, category: str
         stmt = stmt.where(Contest.game_type == game_type)
     if free_status:
         stmt = stmt.where(Contest.free_status == free_status)
+    if automation_class:
+        stmt = stmt.where(Contest.automation_class.in_(automation_class.split(",")))
+    if max_difficulty is not None:
+        stmt = stmt.where(Contest.difficulty <= max_difficulty)
+    if hide_platforms:
+        stmt = stmt.where(or_(Contest.social_platform.is_(None), Contest.social_platform.not_in(hide_platforms.split(","))))
     if fr_eligible:
         stmt = stmt.where(Contest.fr_eligible == fr_eligible)
     if closing_within_days is not None:
@@ -105,10 +112,32 @@ class NewContest(BaseModel):
 def create_contest(body: NewContest, db: Session = Depends(get_db)) -> dict:
     if not is_safe_http_url(body.url):
         raise HTTPException(400, "URL invalide (http/https public uniquement)")
+    from ..discovery.policy import aggregator_profile, denial_reason
+
+    if denial_reason(body.url):
+        prof = aggregator_profile(body.url) or {}
+        raise HTTPException(422, f"{prof.get('name', 'Ce site')} n'autorise pas la lecture automatique de ses fiches. "
+                                 + (prof.get("how_to") or "Ajoutez la page du site de l'organisateur."))
     c = add_contest_by_url(db, body.url, body.title)
     audit(db, "user", "contest_add", contest_id=c.id)
     db.commit()
     return S.contest_detail(c)
+
+
+class ImportBody(BaseModel):
+    text: str = Field(max_length=200_000)
+    origin: str = Field("user_import", pattern="^(user_import|browser_share)$")
+
+
+@router.post("/contests/import")
+def import_contests(body: ImportBody, db: Session = Depends(get_db)) -> dict:
+    """Import volontaire : CSV (url, titre, fin, lot, organisateur) ou une adresse par ligne. Aucune requête réseau ici."""
+    from ..discovery.imports import import_rows, parse
+
+    rows = parse(body.text)
+    if not rows:
+        raise HTTPException(400, "Rien à importer : collez une adresse par ligne ou un CSV avec une colonne url")
+    return import_rows(db, rows, body.origin)
 
 
 @router.get("/contests/{cid}")
@@ -417,6 +446,25 @@ def new_source(body: NewSource, db: Session = Depends(get_db)) -> dict:
     audit(db, "user", "source_add", name=body.name, kind=body.kind)
     db.commit()
     return _source_out(db, s)
+
+
+@router.get("/sources/policy")
+def sources_policy() -> dict:
+    """Catégories d'usage, modes d'accès, matrice des agrégateurs et sites en consultation assistée."""
+    from ..discovery import policy as P
+
+    return {"categories": [{"id": k, "label": v, "allowed_by_default": k in P.ALLOWED_BY_DEFAULT} for k, v in P.USAGE_CATEGORIES.items()],
+            "modes": P.ACCESS_MODES, "matrix": P.matrix(), "references": P.references()}
+
+
+@router.get("/sources/{sid}/quality")
+def source_quality(sid: int, db: Session = Depends(get_db)) -> dict:
+    from ..discovery.quality import source_quality as q
+
+    s = db.get(Source, sid)
+    if s is None:
+        raise HTTPException(404, "Source introuvable")
+    return q(db, s)
 
 
 @router.get("/sources/suggestions")
