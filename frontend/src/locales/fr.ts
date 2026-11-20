@@ -95,6 +95,11 @@ export const fr = {
   'not.title': 'Notifications', 'not.readAll': 'Tout marquer lu', 'not.markRead': 'Marquer lu', 'not.empty': 'Aucune notification.',
   'not.unread': '{n} non lue(s)', 'not.unreadBadge': '{n} notification(s) non lue(s)', 'not.openContest': 'Voir le concours',
   // sources
+  'game.draw': 'Tirage au sort', 'game.instant_win': 'Instant gagnant', 'game.quiz': 'Quiz', 'game.creative': 'Créatif (photo, recette…)',
+  'game.social': 'Réseaux sociaux', 'cat.gameType': 'Type de jeu',
+  'src.sugTitle': 'Sites d’organisateurs à surveiller', 'src.sugHelp': 'Ces marques et médias organisent des concours que l’appli a déjà trouvés. En les surveillant, l’appli lit directement leurs pages de jeux (une fois par jour, dans le respect de leur robots.txt) et trouve leurs prochains concours sans passer par un agrégateur.',
+  'src.sugNone': 'Aucune suggestion pour l’instant : elles apparaissent à mesure que des concours sont trouvés.', 'src.follow': 'Surveiller',
+  'src.followed': 'Site ajouté aux sources', 'src.sugCount': 'concours trouvés', 'src.addSite': 'Surveiller un site par son nom de domaine', 'src.domain': 'Domaine (ex. marque.fr)',
   'src.title': 'Sources', 'src.add': 'Ajouter une source', 'src.kind': 'Type', 'src.country': 'Pays', 'src.scan': 'Lancer un scan',
   'src.scanStarted': 'Scan lancé', 'src.lastScan': 'Dernier scan', 'src.found': 'Concours trouvés', 'src.tos': 'Note sur les CGU',
   'src.jobs': 'Historique des scans', 'src.noJobs': 'Aucun scan.', 'src.noSources': 'Aucune source.', 'src.added': 'Source ajoutée',

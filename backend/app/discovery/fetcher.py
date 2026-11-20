@@ -93,6 +93,13 @@ class Fetcher:
         rp = cached[1]
         return rp is not None and rp.can_fetch(self.ua, url)
 
+    def sitemaps(self, url: str) -> list[str]:
+        """Sitemaps déclarés dans robots.txt (après lecture des règles du site)."""
+        self.allowed(url)
+        p = urlsplit(url)
+        rp = self._robots.get(f"{p.scheme}://{p.netloc}", (0, None))[1]
+        return list(rp.site_maps() or []) if rp is not None else []
+
     def _throttle(self, host: str) -> None:
         with self._lock:
             now = time.time()

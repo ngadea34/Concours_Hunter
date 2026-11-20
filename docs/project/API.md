@@ -85,7 +85,9 @@ Page<T> { items:T[]; total:number; page:number; page_size:number }
 | POST | /api/notifications/{id}/read | | `{ok}` |
 | POST | /api/notifications/read-all | | `{ok}` |
 | GET | /api/sources | | Source[] |
-| POST | /api/sources | `{name, kind:"rss"|"html", url, language?, country?}` | Source |
+| POST | /api/sources | `{name, kind:"rss"|"html"|"site", url, language?, country?}` | Source |
+| GET | /api/sources/suggestions | | `{domain, contests, organizer_names[], examples[]}[]` : sites d'organisateurs pas encore suivis |
+| POST | /api/sources/follow | `{domain}` | Source (kind `site`) ; 400 domaine invalide ou non-organisateur, 409 déjà suivi ou exclu |
 | PATCH | /api/sources/{id} | `{enabled?, name?}` | Source |
 | POST | /api/sources/{id}/scan | | ScanJob |
 | GET | /api/scan-jobs | | ScanJob[] (50 derniers) |

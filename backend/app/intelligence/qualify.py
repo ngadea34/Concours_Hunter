@@ -214,6 +214,9 @@ def qualify(db: Session, contest: Contest, force: bool = False, source_trust: in
     persistent = {f for f in (contest.flags or []) if f in ("captcha", "page_inaccessible", "enriched", "login_required")}
     flags = sorted(set(a["flags"]) | persistent)
     contest.flags = flags
+    from .game_type import classify_game_type
+
+    contest.game_type = classify_game_type(" ".join(filter(None, [contest.title, contest.description, rule.text])), contest.url, flags) or contest.game_type
     suspicious = list(a["suspicious_signals"])
     if "prompt_injection" in flags:
         suspicious.append("contenu tentant de manipuler l'analyse (injection)")

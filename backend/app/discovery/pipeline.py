@@ -142,6 +142,11 @@ def enrich(db: Session, fetcher: Fetcher, contest: Contest, raw: RawContest, sou
     for m in QA_RX.finditer(text):
         record_answer(db, contest, m.group("q").strip(), m.group("a").strip(), source.name if source else "page")
     rules_url = raw.rules_url
+    if soup is not None and raw.extra.get("title_from_url") and contest.title == raw.title:
+        og = soup.select_one('meta[property="og:title"][content]')
+        h = og["content"] if og else (soup.h1.get_text(" ", strip=True) if soup.h1 else (soup.title.get_text(strip=True) if soup.title else ""))
+        if 8 <= len(h.strip()) <= 300:
+            contest.title = h.strip()[:500]
     if soup is not None:
         src_dom = _domain(page_url)
         for a in soup.select("a[href]"):
