@@ -17,6 +17,7 @@ def contest_summary(c: Contest) -> dict:
         "organizer_name": c.organizer.name if c.organizer else None,
         "source_names": sorted({s.source.name for s in c.sightings if s.source}),
         "status": c.status, "category": c.category, "game_type": c.game_type, "prize_summary": c.prize_summary,
+        "automation_class": c.automation_class, "difficulty": c.difficulty, "social_platform": c.social_platform,
         "total_prize_value_eur": c.total_prize_value_eur, "end_date": _iso(c.end_date),
         "days_left": (c.end_date - today).days if c.end_date else None, "language": c.language,
         "countries_allowed": c.eligibility.countries_allowed if c.eligibility else [],
@@ -78,7 +79,14 @@ def notification(n: Notification) -> dict:
 
 def source(s: Source, contests_found: int = 0) -> dict:
     return {"id": s.id, "name": s.name, "kind": s.kind, "url": s.url, "enabled": s.enabled, "language": s.language, "country": s.country,
-            "last_scan_at": _iso(s.last_scan_at), "last_status": s.last_status, "contests_found": contests_found, "tos_note": s.tos_note}
+            "last_scan_at": _iso(s.last_scan_at), "last_status": s.last_status, "contests_found": contests_found, "tos_note": s.tos_note,
+            "access_mode": _access_mode(s)}
+
+
+def _access_mode(s: Source) -> str:
+    from ..discovery.policy import access_mode
+
+    return access_mode(s.kind, s.url)
 
 
 def scan_job(j: ScanJob) -> dict:

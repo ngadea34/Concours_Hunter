@@ -63,6 +63,18 @@ function render(items) {
   });
 }
 
+// Import par partage navigateur : l'utilisateur envoie la page qu'il consulte (jamais un site en consultation assistée)
+function showAddPage() {
+  const b = $('addPage'); b.hidden = false;
+  b.addEventListener('click', async () => {
+    b.disabled = true; setResult(msg('loading'));
+    try {
+      const c = await api('/contests', { method: 'POST', body: { url: tab.url, title: (tab.title || '').slice(0, 500) || undefined } });
+      setResult(msg('pageAdded', [c.title || tab.url]), 'ok');
+    } catch (e) { setResult(e.message, 'err'); b.disabled = false; }
+  }, { once: true });
+}
+
 (async () => {
   [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const status = $('status');
@@ -70,7 +82,7 @@ function render(items) {
   try {
     const list = await api('/participations?url=' + encodeURIComponent(tab.url));
     const items = (list || []).filter((p) => p.status === 'prepared' || p.status === 'awaiting_human');
-    if (!items.length) { status.textContent = msg('noneForPage'); return; }
+    if (!items.length) { status.textContent = msg('noneForPage'); showAddPage(); return; }
     status.textContent = '';
     render(items);
     detectCaptcha();

@@ -21,6 +21,7 @@ export type GameType = 'instant_win' | 'creative' | 'quiz' | 'social' | 'draw';
 export const GAME_TYPES: GameType[] = ['draw', 'instant_win', 'quiz', 'creative', 'social'];
 export const CLAIM_STATUSES: ClaimStatus[] = ['to_claim', 'claimed', 'received', 'expired', 'refused'];
 
+export type AutoClass = 'A1' | 'A2' | 'A3' | 'A4' | 'A5' | 'A6' | 'A7' | 'A8';
 export interface ContestSummary {
   id: number; title: string; url: string; organizer_name: string | null; source_names: string[];
   status: ContestStatus; category: PrizeCategory | null; game_type: GameType | null; prize_summary: string | null;
@@ -28,6 +29,7 @@ export interface ContestSummary {
   language: string | null; countries_allowed: string[]; reliability_score: number | null;
   interest_score: number | null; free_status: FreeStatus; fr_eligible: TriState;
   participation_mode: Mode; participated: boolean; needs_human_reason: string | null; created_at: string;
+  automation_class: AutoClass | null; difficulty: number | null; social_platform: string | null;
 }
 export interface Justification { field: string; decision: string; evidence: string | null; method: string }
 export interface Prize {
@@ -63,7 +65,7 @@ export interface Claim {
 export interface Notification { id: number; kind: string; title: string; body: string | null; contest_id: number | null; created_at: string; read: boolean }
 export interface Source {
   id: number; name: string; kind: string; url: string; enabled: boolean; language: string | null; country: string | null;
-  last_scan_at: string | null; last_status: string | null; contests_found: number; tos_note: string | null;
+  last_scan_at: string | null; last_status: string | null; contests_found: number; tos_note: string | null; access_mode: string;
 }
 export interface SiteSuggestion { domain: string; contests: number; organizer_names: string[]; examples: string[] }
 export interface ScanJob {
@@ -82,6 +84,7 @@ export interface Settings {
   lan_mode: boolean; llm_enabled: boolean; ollama_url: string; llm_model_small: string; llm_model_large: string;
   scan_interval_minutes: number; max_requests_per_domain_per_hour: number;
   interest_categories: Record<PrizeCategory, number>; ui_language: string;
+  written_authorizations?: { domain: string; date: string; reference: string }[];
 }
 export interface Stats {
   contests_total: number; contests_qualified: number; contests_to_verify: number; contests_closing_soon: number;
@@ -102,6 +105,7 @@ export interface Diagnostics {
 export interface AuditLog { ts: string; actor: string; action: string; detail: string }
 export interface ContestQuery {
   q?: string; status?: string; category?: string; game_type?: string; free_status?: string; fr_eligible?: string;
+  automation_class?: string; max_difficulty?: number; hide_platforms?: string;
   closing_within_days?: number; min_reliability?: number; sort?: string; page?: number; page_size?: number;
 }
 
@@ -111,6 +115,7 @@ export interface WeekContest {
   contest_id: number; title: string; url: string; organizer: string | null; prize: string | null; value_eur: number | null;
   end_date: string | null; end_date_verified: boolean; start_date: string | null; days_left: number | null; hours_left: number | null;
   est_minutes: number; status: string; game_type: string | null; reliability: number | null; interest: number | null;
+  automation_class: AutoClass | null; difficulty: number | null; social_platform: string | null;
   conditions: string[]; participated_this_period: boolean; period: string;
 }
 export interface WeekItem extends WeekContest {
@@ -152,6 +157,20 @@ export interface WeekPrefs {
   timezone: string; plan_weekday: number; plan_hour: number; review_weekday: number; review_hour: number; daily_enabled: boolean;
   daily_hour: number; notifications_enabled: boolean; remind_close_hours: number; alert_close_hours: number; remind_results: boolean;
   remind_claims: boolean; minutes_per_day: number; active_days: number[]; weekly_goal: number; min_interest: number; min_reliability: number;
+  automation_mode: 'max' | 'mixed' | 'manual'; hide_facebook: boolean; hide_instagram: boolean; hide_creative: boolean;
+  favor_quick_forms: boolean; favor_instant_win: boolean; favor_quiz: boolean; favor_many_prizes: boolean; social_share_max: number;
 }
 export interface WeekReport { id: number; kind: 'weekly' | 'daily' | 'review'; period_start: string; period_end: string; generated_at: string; text?: string }
 export interface TaskHistory { at: string; field: string; old: string | null; new: string | null; actor: string }
+export interface SourcePolicy {
+  categories: { id: number; label: string; allowed_by_default: boolean }[];
+  modes: Record<string, string>;
+  matrix: { domain: string; name: string; automated_extraction: boolean; authorized_in_writing: boolean; category_of_scan: number | null; modes: string[]; reason: string; unlock: string | null }[];
+  references: { domain: string; name: string; url: string; reason: string; how_to: string; unlock: string | null; modes: string[] }[];
+}
+export interface SourceQuality {
+  source_id: number; name: string; kind: string; access_mode: string; metrics: Record<string, number>; percent: Record<string, number>;
+  restrictions: { blocked_scans: number; last_block: string | null; note: string };
+  last_scans: { status: string; found: number; new: number; error: string | null; finished_at: string | null }[]; issues: string[];
+}
+export interface ImportResult { created: number[]; existing: number[]; skipped: { line: number | null; url: string; reason: string }[] }

@@ -123,3 +123,14 @@ Page<T> { items:T[]; total:number; page:number; page_size:number }
 | PATCH | /api/promotions/{id} | `{status?, refund_received_eur?, …}` | Promotion ; « refunded » exige `refund_received_eur` |
 | POST | /api/weekly/command | `{command:"/hunter-week plan|results|deadlines|opportunities|tasks|report|next|settings [clé=valeur]"}` | `{text, data}` |
 
+### Politique de sources (v0.4)
+| Méthode | Route | Corps / paramètres | Réponse |
+|---|---|---|---|
+| GET | /api/sources/policy | | `{categories[], modes{}, matrix[], references[]}` |
+| GET | /api/sources/{id}/quality | | SourceQuality : métriques, pourcentages, scans bloqués, points à surveiller |
+| POST | /api/contests/import | `{text, origin?: user_import|browser_share}` | `{created[], existing[], skipped[{line,url,reason}]}` |
+| POST | /api/contests | `{url, title?}` | 422 si le site est en consultation assistée (message avec la marche à suivre) |
+| GET | /api/contests | + `automation_class` (A1,A2…), `max_difficulty`, `hide_platforms` (facebook,instagram) | |
+
+Source : champ `access_mode`. Concours : `automation_class`, `difficulty`, `social_platform`. Préférences hebdo : `automation_mode` (max, mixed, manual), `hide_facebook`, `hide_instagram`, `hide_creative`, `favor_quick_forms`, `favor_instant_win`, `favor_quiz`, `favor_many_prizes`, `social_share_max`.
+

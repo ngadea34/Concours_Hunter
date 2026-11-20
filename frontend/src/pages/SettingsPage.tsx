@@ -275,6 +275,50 @@ function AdminSection() {
   );
 }
 
+function AuthorizationsSection() {
+  const { t } = useI18n();
+  const toast = useToast();
+  const st = useAsync(() => api.settings(), []);
+  const pol = useAsync(() => api.sourcePolicy(), []);
+  const [domain, setDomain] = useState('');
+  const [date, setDate] = useState('');
+  const [reference, setReference] = useState('');
+  const save = async (list: { domain: string; date: string; reference: string }[]) => {
+    try { const s = await api.saveSettings({ written_authorizations: list }); st.setData(s); pol.reload(); toast.ok(t('auth.saved')); } catch (e) { toast.err(e); }
+  };
+  return (
+    <section className="card" aria-labelledby="h-auth">
+      <h2 id="h-auth">{t('wauth.title')}</h2>
+      <p className="muted small">{t('wauth.help')}</p>
+      <Async state={st}>
+        {(s) => {
+          const list = s.written_authorizations ?? [];
+          const domains = (pol.data?.matrix ?? []).filter((m) => !m.authorized_in_writing && m.modes.length > 0);
+          return (
+            <>
+              {list.length > 0 && <ul className="list">{list.map((a) => (
+                <li key={a.domain} className="row between wrap gap">
+                  <span><strong>{a.domain}</strong> · {a.date} · {a.reference}</span>
+                  <button className="btn" onClick={() => save(list.filter((x) => x.domain !== a.domain))}>{t('auth.remove')}<span className="sr-only"> {a.domain}</span></button>
+                </li>))}</ul>}
+              <form className="form-grid" onSubmit={(e: FormEvent) => { e.preventDefault(); save([...list, { domain, date, reference: reference.trim() }]).then(() => setReference('')); }}>
+                <div className="field"><label htmlFor="au-d">{t('auth.site')}</label>
+                  <select id="au-d" required value={domain} onChange={(e) => setDomain(e.target.value)}>
+                    <option value="">—</option>{domains.map((m) => <option key={m.domain} value={m.domain}>{m.name}</option>)}
+                  </select></div>
+                <div className="field"><label htmlFor="au-dt">{t('auth.date')}</label><input id="au-dt" type="date" required value={date} onChange={(e) => setDate(e.target.value)} /></div>
+                <div className="field wide"><label htmlFor="au-r">{t('auth.reference')}</label>
+                  <input id="au-r" required minLength={5} value={reference} onChange={(e) => setReference(e.target.value)} /></div>
+                <div className="field"><button className="btn btn-primary">{t('common.add')}</button></div>
+              </form>
+            </>
+          );
+        }}
+      </Async>
+    </section>
+  );
+}
+
 export function SettingsPage() {
   const { t } = useI18n();
   return (
@@ -283,6 +327,7 @@ export function SettingsPage() {
       <ProfileSection />
       <ConsentsSection />
       <SettingsSection />
+      <AuthorizationsSection />
       <SchedulerSection />
       <AdminSection />
     </>

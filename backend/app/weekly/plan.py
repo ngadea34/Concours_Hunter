@@ -75,12 +75,44 @@ def brief(c: Contest, tz, today: date, now_utc: datetime | None = None) -> dict:
         "days_left": (c.end_date - today).days if c.end_date else None,
         "hours_left": round(hours_until_close(c.end_date, tz, now_utc), 1) if c.end_date else None,
         "est_minutes": estimated_minutes(c.entry_method, flags), "status": c.status, "game_type": c.game_type,
+        "automation_class": automation_class(c), "difficulty": c.difficulty, "social_platform": c.social_platform,
         "reliability": c.reliability_score, "interest": c.interest_score, "conditions": conditions(c),
         "participated_this_period": participated_this_period(c, today) is not None, "period": period_of(c),
     }
 
 
 # ------------------------------------------------------------------ participations prioritaires
+def automation_class(c: Contest) -> str:
+    """Classe A1 à A8 (calculée à la volée si le concours n'a pas encore été reclassé)."""
+    if c.automation_class:
+        return c.automation_class
+    from ..intelligence.automatability import apply
+
+    return apply(c)["class"]
+
+
+def winners_count(c: Contest) -> int:
+    return sum(p.quantity or 1 for p in (c.prizes or []))
+
+
+def filter_reason(c: Contest, prefs: dict) -> str | None:
+    """Raison pour laquelle les filtres de l'utilisateur écartent ce concours, ou None s'il passe."""
+    from .prefs import AUTOMATION_MODES
+
+    cls = automation_class(c)
+    if cls in ("A7", "A8"):
+        return "Achat nécessaire" if cls == "A7" else "Participation impossible ou non vérifiable"
+    if cls not in AUTOMATION_MODES.get(prefs.get("automation_mode", "mixed"), AUTOMATION_MODES["mixed"]):
+        return f"Type {cls} hors du mode d'automatisation choisi"
+    if prefs.get("hide_creative") and cls == "A5":
+        return "Concours créatifs masqués"
+    if prefs.get("hide_facebook") and c.social_platform == "facebook":
+        return "Concours Facebook masqués"
+    if prefs.get("hide_instagram") and c.social_platform == "instagram":
+        return "Concours Instagram masqués"
+    return None
+
+
 def priority_candidates(db: Session, prefs: dict, today: date, favorites: set[int]) -> list[tuple[Contest, float, list[str]]]:
     stmt = select(Contest).where(Contest.merged_into_id.is_(None), Contest.status.in_(("qualified", "participated")),
                                  Contest.free_status.in_(("free", "free_alternative")), Contest.fr_eligible == "yes",
@@ -91,13 +123,24 @@ def priority_candidates(db: Session, prefs: dict, today: date, favorites: set[in
             continue
         if not has_official_rules(c) or participated_this_period(c, today):
             continue
-        score, reasons = score_contest(c, today, c.id in favorites)
+        if filter_reason(c, prefs):
+            continue
+        score, reasons = score_contest(c, today, c.id in favorites, prefs)
         out.append((c, score, reasons))
     out.sort(key=lambda x: (-x[1], x[0].end_date or date.max, x[0].id))
     return out
 
 
-def score_contest(c: Contest, today: date, favorite: bool) -> tuple[float, list[str]]:
+# bonus d'automatisabilité : A1 et A2 passent devant à critères comparables ; A4 reste possible mais recule
+AUTOMATION_BONUS = {"A1": 6, "A2": 5, "A3": 2, "A4": -3, "A5": -6, "A6": -6}
+
+
+def score_contest(c: Contest, today: date, favorite: bool, prefs: dict | None = None) -> tuple[float, list[str]]:
+    import math
+
+    from ..intelligence.automatability import CLASSES
+
+    prefs = prefs or {}
     interest, rel = c.interest_score or 0, c.reliability_score or 0
     flags = c.flags or []
     est = estimated_minutes(c.entry_method, flags)
@@ -105,6 +148,13 @@ def score_contest(c: Contest, today: date, favorite: bool) -> tuple[float, list[
     s = 0.5 * interest + 0.25 * rel
     if c.total_prize_value_eur:
         reasons.append(f"Valeur estimée {c.total_prize_value_eur:.0f} €")
+    cls = automation_class(c)
+    b = AUTOMATION_BONUS.get(cls, 0)
+    s += b
+    reasons.append(f"{cls} · {CLASSES[cls]}" + (f" (+{b})" if b > 0 else f" ({b})" if b < 0 else ""))
+    if c.difficulty and c.difficulty >= 3:
+        s -= 2 * (c.difficulty - 2)
+        reasons.append(f"Difficulté {c.difficulty}/5")
     days = (c.end_date - today).days if c.end_date else None
     if days is not None:
         u = 15 if days <= 2 else 10 if days <= 6 else 5 if days <= 13 else 0
@@ -126,7 +176,23 @@ def score_contest(c: Contest, today: date, favorite: bool) -> tuple[float, list[
         s -= cx
         reasons.append("Participation plus complexe (CAPTCHA ou compte)")
     if period_of(c) in ("daily", "weekly"):
+        s += 2
         reasons.append("Participation renouvelable : " + ("chaque jour" if period_of(c) == "daily" else "chaque semaine"))
+    # préférences « favoriser »
+    if prefs.get("favor_quick_forms") and cls == "A1" and est <= 2:
+        s += 6
+        reasons.append("Formulaire rapide (vos préférences)")
+    if prefs.get("favor_instant_win") and c.game_type == "instant_win":
+        s += 6
+        reasons.append("Instant gagnant (vos préférences)")
+    if prefs.get("favor_quiz") and cls == "A2":
+        s += 6
+        reasons.append("Quiz (vos préférences)")
+    n = winners_count(c)
+    if prefs.get("favor_many_prizes") and n > 1:
+        bonus = min(8, round(3 * math.log10(n), 1))
+        s += bonus
+        reasons.append(f"{n} lots à gagner (vos préférences)")
     return round(s, 1), reasons
 
 
@@ -147,12 +213,19 @@ def schedule(items: list[WeeklyPlanItem], prefs: dict, ws: date, today: date) ->
     for it in items:
         it.scheduled_day = None
     goal = prefs["weekly_goal"] or 10**6
-    chosen, used = [], 0
+    # les concours sur réseaux sociaux (A4) ne doivent pas monopoliser le programme
+    share = prefs.get("social_share_max", 30)
+    social_cap = max(1, int(min(goal, len(items)) * share / 100)) if share < 100 else 10**6
+    chosen, used, social = [], 0, 0
     for it in sorted(items, key=lambda i: (i.decision != "accepted", -i.score)):
         if len(chosen) >= goal or used + it.est_minutes > capacity:
             continue
+        is_social = automation_class(it.contest) == "A4"
+        if is_social and social >= social_cap and it.decision != "accepted":
+            continue
         chosen.append(it)
         used += it.est_minutes
+        social += is_social
     planned = 0
     for it in sorted(chosen, key=lambda i: (i.contest.end_date or date.max, -i.score)):
         last = min(it.contest.end_date or ws + timedelta(days=6), ws + timedelta(days=6))
@@ -325,6 +398,10 @@ def opportunities(db: Session, prefs: dict, tz, today: date, now_utc: datetime |
     for c in db.scalars(stmt):
         if c.id in dis and c.id not in fol:
             continue
+        if c.id not in fol and (c.social_platform in ("facebook", "instagram") or c.automation_class == "A5"):
+            hidden = filter_reason(c, {**prefs, "automation_mode": "manual"})
+            if hidden and "masqués" in hidden:
+                continue  # les filtres « masquer » s'appliquent aussi aux opportunités
         if any(j.get("field") == "suspicious" for j in (c.justifications or [])) and c.id not in fol:
             continue  # signaux d'arnaque : jamais proposé comme opportunité
         why = []

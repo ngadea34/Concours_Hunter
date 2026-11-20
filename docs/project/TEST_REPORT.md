@@ -4,12 +4,29 @@ Environnements : conteneur Linux (Python 3.13) ; CI GitHub Linux + Windows ; PC 
 
 | Suite | Résultat |
 |---|---|
-| Backend `cd backend && python -m pytest` | **71/71 réussis** (≈10 s, conteneur Linux, v0.3.0) ; 38/38 sur le PC de Nico en v0.1 |
+| Backend `cd backend && python -m pytest` | **84/84 réussis** (≈12 s, conteneur Linux, v0.4.0) ; 38/38 sur le PC de Nico en v0.1 |
 | Extension `node --test extension/test/` | **8/8 réussis** (dont e2e Chromium : remplissage, aucun submit) |
 | Frontend `npm run build` (tsc strict + vite) | OK |
+| Pages « Sources » (politique, import, qualité) et « Ma semaine > Réglages » dans Chromium (1280px, 390px) | 0 erreur console, pas de défilement horizontal |
 | Page « Ma semaine » dans Chromium (1280px, 390px) | 0 erreur console, pas de défilement horizontal |
 | UI dans Chromium, 9 pages × 2 tailles (1280px, 390px) | 0 erreur console, 0 requête en échec, pas de défilement horizontal |
 | Parcours UI : fiche → préparer → participations | OK |
+
+## Politique de sources (v0.4, `tests/test_source_policy.py`)
+| Vérification | Test |
+|---|---|
+| Classes A1 à A8 et difficulté | test_automatability_classes, test_difficulty_index |
+| Classe posée à la qualification, filtre catalogue | test_qualify_sets_class_and_catalog_filter |
+| Catégories 6 et 7 non autorisées par défaut, matrice des 4 agrégateurs | test_categories_and_matrix |
+| Site en consultation assistée jamais lu, explication donnée | test_denied_site_never_fetched_but_explained |
+| Import CSV et liste, dates, doublons | test_user_import_csv_and_lines |
+| A1/A2 favorisés, A4 plafonné sans être exclu | test_a1_a2_first_and_social_capped |
+| Filtres utilisateur (masquer, mode max, favoriser) | test_user_filters |
+| A7/A8 jamais programmés | test_a7_a8_never_planned |
+| Une source en panne n'arrête pas les autres ; site exclu jamais scanné | test_one_failing_source_never_blocks_others |
+| Contrôle qualité par source | test_source_quality_report |
+| Migration v5 | test_migration_backfills_class |
+| Accord écrit obligatoire (avec référence) pour réactiver un site | test_written_authorization_unlocks_only_with_reference, test_aggregator_scan_end_to_end |
 
 ## Cas obligatoires M15 (Programme de la semaine)
 | Cas | Test (`tests/test_weekly.py`) |

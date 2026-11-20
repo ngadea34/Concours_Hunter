@@ -34,6 +34,10 @@ async def lifespan(app: FastAPI):  # noqa: ANN201
 
         with session_scope() as db:
             seed(db)
+    from .admin.settings_service import get_settings_dict
+
+    with session_scope() as db:
+        get_settings_dict(db)  # charge les autorisations écrites d'éditeurs (politique de sources)
     get_api_token()
     from .scheduler.runner import runner
 

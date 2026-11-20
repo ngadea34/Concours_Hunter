@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import type { SourceQuality } from '../types';
 import { api } from '../api';
 import { Async } from '../components/Async';
 import { Badge } from '../components/Badge';
@@ -14,6 +15,24 @@ export function Sources() {
   const src = useAsync(() => api.sources(), []);
   const jobs = useAsync(() => api.scanJobs(), []);
   const sug = useAsync(() => api.siteSuggestions(), []);
+  const pol = useAsync(() => api.sourcePolicy(), []);
+  const [quality, setQuality] = useState<Record<number, SourceQuality | undefined>>({});
+  const [imp, setImp] = useState('');
+  const [impRes, setImpRes] = useState<string[] | null>(null);
+  const toggleQuality = async (id: number) => {
+    if (quality[id]) { setQuality({ ...quality, [id]: undefined }); return; }
+    try { const q = await api.sourceQuality(id); setQuality({ ...quality, [id]: q }); } catch (e) { toast.err(e); }
+  };
+  const doImport = async (e: FormEvent) => {
+    e.preventDefault();
+    try {
+      const r = await api.importContests(imp);
+      toast.ok(t('src.impDone'));
+      setImpRes([`${r.created.length} ${t('src.impCreated')} · ${r.existing.length} ${t('src.impExisting')} · ${r.skipped.length} ${t('src.impSkipped')}`,
+        ...r.skipped.map((x) => `${x.line ?? ''} ${x.url} : ${x.reason}`)]);
+      if (r.created.length) setImp('');
+    } catch (err) { toast.err(err); }
+  };
   const [domain, setDomain] = useState('');
   const [name, setName] = useState('');
   const [kind, setKind] = useState<'rss' | 'html'>('rss');
@@ -50,7 +69,10 @@ export function Sources() {
                 <article key={s.id} className="card">
                   <div className="row between wrap">
                     <h3>{s.name}</h3>
-                    <Badge tone={s.enabled ? 'ok' : 'neutral'}>{s.enabled ? t('common.enabled') : t('common.disabled')}</Badge>
+                    <div className="row gap wrap">
+                      <Badge tone={s.access_mode === 'assisted' ? 'warn' : 'info'}>{t(`src.mode.${s.access_mode}`)}</Badge>
+                      <Badge tone={s.enabled ? 'ok' : 'neutral'}>{s.enabled ? t('common.enabled') : t('common.disabled')}</Badge>
+                    </div>
                   </div>
                   <p className="small">{s.kind.toUpperCase()} · {h ? <a href={h} target="_blank" rel="noopener noreferrer">{s.url}</a> : s.url}</p>
                   <p className="muted small">
@@ -66,7 +88,11 @@ export function Sources() {
                     <button className="btn btn-primary" disabled={!s.enabled} onClick={() => act(() => api.scanSource(s.id), t('src.scanStarted'))}>
                       {t('src.scan')}<span className="sr-only"> {s.name}</span>
                     </button>
+                    <button className="btn" aria-expanded={Boolean(quality[s.id])} onClick={() => toggleQuality(s.id)}>
+                      {quality[s.id] ? t('src.qualityHide') : t('src.quality')}<span className="sr-only"> {s.name}</span>
+                    </button>
                   </div>
+                  {quality[s.id] && <QualityView q={quality[s.id]!} />}
                 </article>
               );
             })}
@@ -100,6 +126,54 @@ export function Sources() {
           <div className="field"><button className="btn btn-primary">{t('src.follow')}</button></div>
         </form>
       </section>
+
+      <section className="card">
+        <h2>{t('src.impTitle')}</h2>
+        <p className="muted small">{t('src.impHelp')}</p>
+        <form onSubmit={doImport}>
+          <div className="field wide"><label htmlFor="imp" className="sr-only">{t('src.impTitle')}</label>
+            <textarea id="imp" rows={4} required value={imp} onChange={(e) => setImp(e.target.value)} placeholder={'https://marque.fr/jeu-concours ; Gagnez un vélo ; 31/12/2026'} /></div>
+          <button className="btn btn-primary">{t('src.impBtn')}</button>
+        </form>
+        {impRes && <ul className="list small">{impRes.map((l, i) => <li key={i}>{l}</li>)}</ul>}
+      </section>
+
+      <Async state={pol}>
+        {(p) => (
+          <section className="card">
+            <h2>{t('src.refTitle')}</h2>
+            <p className="muted small">{t('src.refHelp')}</p>
+            <ul className="list">
+              {p.references.map((r) => {
+                const h = safeHref(r.url);
+                return (
+                  <li key={r.domain}>
+                    <div className="row between wrap gap">
+                      <strong>{r.name}</strong>
+                      {h && <a className="btn" href={h} target="_blank" rel="noopener noreferrer">{t('src.refOpen')}<span className="sr-only"> {r.name}</span></a>}
+                    </div>
+                    <p className="small">{r.how_to}</p>
+                    <p className="muted small">{r.reason}{r.unlock && ` ${t('src.refUnlock')} : ${r.unlock}`}</p>
+                  </li>
+                );
+              })}
+            </ul>
+            <h3>{t('src.matrixTitle')}</h3>
+            <ul className="list">
+              {p.matrix.map((m) => (
+                <li key={m.domain}>
+                  <div className="row between wrap gap">
+                    <strong>{m.name}</strong>
+                    <Badge tone={m.automated_extraction ? 'ok' : 'warn'}>{t('src.matrixAuto')} : {m.automated_extraction ? t('src.yes') : t('src.no')}</Badge>
+                  </div>
+                  <p className="muted small">{m.reason}</p>
+                  {m.modes.length > 0 && <p className="small">{t('src.mode')} : {m.modes.join(', ')}</p>}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+      </Async>
 
       <section className="card">
         <h2>{t('src.add')}</h2>
@@ -136,5 +210,17 @@ export function Sources() {
         </Async>
       </section>
     </>
+  );
+}
+
+function QualityView({ q }: { q: SourceQuality }) {
+  const { t } = useI18n();
+  const keys = ['official_link', 'with_rules', 'conditions_known', 'qualified', 'to_verify', 'missing_end_date', 'missing_prize', 'inconsistent_dates', 'expired'];
+  return (
+    <div className="note">
+      <p className="small">{q.metrics.contests} · {q.metrics.merged_duplicates} {t('src.q.dups')} · {q.restrictions.blocked_scans} {t('src.q.blocked')}</p>
+      <ul className="list small">{keys.map((k) => <li key={k}>{t(`src.q.${k}`)} : {q.metrics[k]} ({q.percent[k]} %)</li>)}</ul>
+      <p className="small"><strong>{t('src.qIssues')}</strong> : {q.issues.length ? q.issues.join(' · ') : t('src.qNone')}</p>
+    </div>
   );
 }
