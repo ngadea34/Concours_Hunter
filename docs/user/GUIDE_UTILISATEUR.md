@@ -51,6 +51,21 @@ La page **Ma semaine** répond à la question « qu'est-ce que je fais cette sem
 
 La barre de commande accepte `/hunter-week plan`, `results`, `deadlines`, `opportunities`, `tasks`, `report`, `next`, `settings minutes_per_day=45`. Les mêmes commandes existent en ligne de commande : `python -m app.cli hunter-week plan`.
 
+## 1 quater. Shop & Promo : offres remboursées et jeux avec achat
+
+La page **Shop & Promo** vous aide à repérer les achats vraiment intéressants et à suivre vos remboursements. **Elle n'achète jamais rien et n'envoie aucun document** : elle conseille et prépare, vous décidez et vous envoyez.
+
+- **Opérations** : promotions disponibles, produits à acheter, 100 % remboursés, jeux avec achat, remboursements partiels, offres proches de l'expiration. Chaque fiche donne le prix, le remboursement annoncé, le **coût net prévisionnel** (valable seulement si toutes les conditions sont remplies et le remboursement reçu), la catégorie (A excellente, B intéressante, C spéculative), le produit exact (EAN), la disponibilité et la prochaine étape. Dans un jeu avec achat, la valeur du lot n'est **jamais** déduite du prix.
+- **Disponibilité** : les stocks en temps réel des magasins ne sont pas accessibles. « Signaler une disponibilité » vous permet de noter ce que vous avez vu en rayon ou dans le catalogue de l'enseigne, avec la source.
+- **Analyser** : collez le texte de l'offre ou du règlement. L'application en tire les dates, l'EAN, le format, les enseignes, les limites, le cumul, le canal et les justificatifs, avec les extraits du texte. « Analyser et enregistrer » ajoute l'opération.
+- **Dossiers** : « Préparer le dossier » ouvre 12 contrôles (règlement, période d'achat, période de demande, double demande, produit exact, ticket, justificatifs, canal officiel…). Ajoutez la photo du ticket et des justificatifs, collez le texte du ticket (ou lecture automatique si le modèle local est activé), indiquez le montant payé. Puis **Vérifier et demander la validation** : vous voyez exactement ce qui sera transmis ; cochez la case pour valider. Envoyez ensuite vous-même le dossier sur le site officiel (ou par courrier) et cliquez **J'ai transmis le dossier**. Les coordonnées bancaires ne se saisissent que sur le site officiel.
+- **Suivi** : accusé de réception, puis **Remboursement reçu** seulement quand le virement ou le bon est visible sur votre compte (montant et date obligatoires). Un remboursement en retard est signalé automatiquement.
+- **Justificatifs** : l'original est conservé chiffré et n'est jamais modifié ; vos corrections sont enregistrées à part. Un justificatif de paiement est « sensible » et ne s'ouvre qu'après confirmation.
+- **Dépenses** : dépenses du mois, économies réalisées (remboursements reçus uniquement), remboursements en attente ou refusés, gains aléatoires (comptés à part), coût net réel, plafond restant, historique de 12 mois.
+- **Réglages** : vos enseignes et magasins, code postal, rayon, budget maximal par produit (30 € par défaut), plafond mensuel (60 € par défaut), produits ou marques acceptés et refusés, catégorie minimale affichée.
+
+La barre de commande et ses boutons acceptent `/hunter-shop discover`, `available`, `cashback`, `contests`, `analyze <texte>`, `submit <n° de l'opération>`, `track`, `report`. En ligne de commande : `python -m app.cli hunter-shop report`.
+
 ## 2. Le cycle d'un concours
 
 Chaque concours suit ce parcours :
@@ -174,7 +189,9 @@ Pour couper toute activité, utilisez l'arrêt d'urgence, puis fermez la fenêtr
 ## 12. Ce que l'application ne fera jamais
 
 - contourner un CAPTCHA, une connexion, un blocage géographique (géoblocage) ou les conditions générales d'un site ;
-- acheter quoi que ce soit, ou participer à un concours qui exige un achat ;
+- acheter quoi que ce soit, ou participer seule à un concours qui exige un achat (Shop & Promo prépare, vous décidez) ;
+- transmettre un dossier de remboursement ou un justificatif à votre place, ou manipuler vos coordonnées bancaires ;
+- déclarer un remboursement reçu avant que vous l'ayez constaté ;
 - soumettre un formulaire sans votre consentement ;
 - envoyer vos données ailleurs que dans un formulaire que vous validez ;
 - présenter un score comme une chance de gagner.

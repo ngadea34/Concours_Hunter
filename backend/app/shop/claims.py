@@ -18,7 +18,7 @@ from ..i18n.geo import norm
 from ..intelligence.scoring import SUSPICIOUS_HOSTS
 from . import ledger
 from .documents import fields
-from .finance import expected_refund
+from .finance import DOC_LABELS, expected_refund
 from .products import match_product
 
 STEPS = ["Règlement identifié", "Conditions extraites", "Période d'achat", "Période et limite de demande", "Produit exact",
@@ -198,7 +198,7 @@ def run_checks(db: Session, c: ShopClaim, today: date | None = None) -> list[dic
             missing.append(need)
     if c.kind == "purchase_game" and re.search(r"\bcode", norm(p.rules_text or "")) and not c.codes:
         missing.append("code(s) à saisir")
-    res.append(("ok", "Justificatifs complets") if not missing else ("fail", "Manquant : " + ", ".join(missing)))
+    res.append(("ok", "Justificatifs complets") if not missing else ("fail", "Manquant : " + ", ".join(DOC_LABELS.get(m, m) for m in missing)))
     # 8 dossier
     blocking = [s for s, _ in res if s in ("fail", "pending")]
     res.append(("ok", "Dossier prêt") if not blocking else ("pending", "Dossier incomplet"))

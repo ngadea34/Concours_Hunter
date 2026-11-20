@@ -4,13 +4,33 @@ Environnements : conteneur Linux (Python 3.13) ; CI GitHub Linux + Windows ; PC 
 
 | Suite | Résultat |
 |---|---|
-| Backend `cd backend && python -m pytest` | **84/84 réussis** (≈12 s, conteneur Linux, v0.4.0) ; 38/38 sur le PC de Nico en v0.1 |
+| Backend `cd backend && python -m pytest` | **105/105 réussis** (≈14 s, conteneur Linux, v0.5.0) ; 38/38 sur le PC de Nico en v0.1 |
 | Extension `node --test extension/test/` | **8/8 réussis** (dont e2e Chromium : remplissage, aucun submit) |
 | Frontend `npm run build` (tsc strict + vite) | OK |
 | Pages « Sources » (politique, import, qualité) et « Ma semaine > Réglages » dans Chromium (1280px, 390px) | 0 erreur console, pas de défilement horizontal |
+| Page « Shop & Promo » dans Chromium (1280px, 390px) : opérations, dossier en 12 contrôles, validation (bouton inactif tant que la case n'est pas cochée), transmission enregistrée, dépenses, analyse, commande | 0 erreur console, pas de défilement horizontal |
 | Page « Ma semaine » dans Chromium (1280px, 390px) | 0 erreur console, pas de défilement horizontal |
 | UI dans Chromium, 9 pages × 2 tailles (1280px, 390px) | 0 erreur console, 0 requête en échec, pas de défilement horizontal |
 | Parcours UI : fiche → préparer → participations | OK |
+
+## Shop & Promo (v0.5, `tests/test_shop.py`) — 15 cas obligatoires de la directive M14
+| Cas | Test |
+|---|---|
+| Produit avec mauvais code EAN | test_wrong_ean |
+| Ticket illisible | test_unreadable_receipt |
+| Ticket incomplet | test_incomplete_receipt |
+| Achat hors période | test_purchase_out_of_period |
+| Produit non participant ; disponible seulement dans certaines enseignes | test_product_not_participating_and_retailer_restriction |
+| Offre expirée | test_expired_offer |
+| Remboursement partiel ; remboursement intégral | test_partial_and_full_refund_profitability |
+| Double demande | test_double_request_blocked |
+| Dossier refusé | test_refused_claim |
+| Remboursement reçu (seulement constaté) | test_refund_received_only_when_observed |
+| Remboursement en retard | test_late_refund |
+| Offre cumulable ou non cumulable | test_cumulable_or_not |
+| Disponibilité non vérifiable | test_availability_never_claims_shelf_without_store_source |
+
+Autres : analyse d'offre, jeu avec achat jamais compté comme économie, original chiffré et intact, document sensible sur confirmation, canal non vérifié bloquant, parcours jeu avec achat → participation manuelle, plafond mensuel, API et `/hunter-shop`.
 
 ## Politique de sources (v0.4, `tests/test_source_policy.py`)
 | Vérification | Test |

@@ -7,6 +7,7 @@ import { ErrorBox, Loading } from './components/Async';
 import { useI18n } from './i18n';
 import { errMsg } from './util';
 import { Dashboard } from './pages/Dashboard';
+import { Shop } from './pages/Shop';
 import { Week } from './pages/Week';
 import { Catalog } from './pages/Catalog';
 import { ContestPage } from './pages/ContestPage';
@@ -41,6 +42,7 @@ export function App() {
       <Route element={<Layout />}>
         <Route index element={<Dashboard />} />
         <Route path="week" element={<Week />} />
+        <Route path="shop" element={<Shop />} />
         <Route path="catalog" element={<Catalog />} />
         <Route path="contests/:id" element={<ContestPage />} />
         <Route path="review" element={<ReviewQueue />} />

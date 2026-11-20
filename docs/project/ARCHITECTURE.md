@@ -12,6 +12,7 @@ extension MV3 ──localhost + jeton──────────────�
                                                        ├─ notifications/M09
                                                        ├─ scheduler/    M10 APScheduler, quotas, arrêt d'urgence
                                                        ├─ weekly/       M15 programme de la semaine
+                                                       ├─ shop/         M14 Shop & Promo (offres, dossiers, dépenses)
                                                        ├─ analytics/    M08
                                                        ├─ security/     M07 chiffrement, jeton, assainissement
                                                        ├─ admin/        M12 sauvegarde, restauration, diagnostic
@@ -30,7 +31,7 @@ extension MV3 ──localhost + jeton──────────────�
 - **Accès** : écoute `127.0.0.1` par défaut ; mode LAN (smartphone) activable, protégé par jeton.
 
 ## Modèle de données (M03)
-Tables : contests, organizers, sources, source_connectors, contest_rules, eligibility, prizes, answers, participations, participation_proofs, results, claims, user_profile, consents, browser_sessions, automation_policies, scan_jobs, notifications, audit_logs, settings, schema_version ; M15 (migration v4) : weekly_preferences, weekly_plans, weekly_plan_items, weekly_results, weekly_tasks, weekly_task_history, weekly_notifications, weekly_reports, promotions.
+Tables : contests, organizers, sources, source_connectors, contest_rules, eligibility, prizes, answers, participations, participation_proofs, results, claims, user_profile, consents, browser_sessions, automation_policies, scan_jobs, notifications, audit_logs, settings, schema_version ; M15 (migration v4) : weekly_preferences, weekly_plans, weekly_plan_items, weekly_results, weekly_tasks, weekly_task_history, weekly_notifications, weekly_reports, promotions ; M14 (migration v6) : promo_availability, shop_documents, shop_claims, shop_ledger.
 Voir `backend/app/db/models.py`.
 
 ## Scores (Partie VI)
@@ -48,3 +49,12 @@ Voir `backend/app/db/models.py`.
 
 ## Indice d'automatisabilité et difficulté
 `intelligence/automatability.py` classe chaque concours : A1 formulaire web, A2 quiz, A3 e-mail, A4 réseau social, A5 créatif, A6 action humaine (CAPTCHA, compte, courrier, SMS, magasin), A7 achat, A8 impossible ou non vérifiable. Ordre de priorité des règles : A8, A7, A5, A4, A6, A3, A2, A1. Difficulté 1 à 5 = base de la classe + CAPTCHA / connexion / courrier. L'indice ne déclenche jamais seul une participation automatique : la politique d'automatisation reste prioritaire.
+
+## Hunter Shop & Promo (M14)
+- **Analyse** (`shop/analyze.py`) : expressions régulières sur le texte normalisé, chaque champ avec son extrait ; fiabilité 0 à 100 selon les champs trouvés.
+- **Rentabilité** (`shop/finance.py`) : coût net = prix − remboursement attendu (plafonné au prix et au plafond du règlement) − avantages comptés seulement si `cumulable is True` + frais. Jeu avec achat : remboursement 0, lot affiché à part. Catégorie A = 100 % remboursé + conditions simples + produit identifié + règlement vérifiable (fiabilité ≥ 60) ; B = remboursement ≥ 30 % ou jeu attractif bon marché ; C sinon.
+- **Produit** (`shop/products.py`) : clé de contrôle EAN-8/13, comparaison format/variante, `exact | mismatch | unverified`.
+- **Disponibilité** (`shop/recommend.py`) : meilleure observation parmi vos enseignes ; `store_confirmed` exige une source.
+- **Justificatifs** (`shop/documents.py`) : type vérifié par signature, 10 Mo max., original chiffré + SHA-256, copie de travail, champs extraits + corrections utilisateur séparées.
+- **Dossiers** (`shop/claims.py`) : statuts draft → incomplete → ready → awaiting_validation → validated → sent → confirmed → refund_pending → refunded | refused | cancelled ; 12 contrôles recalculés à chaque changement ; la validation exige `confirm: true` et les étapes 1 à 9 sans blocage ; chaque événement est historisé.
+- **Registre** (`shop/ledger.py`) : écritures expense, refund_requested, refund_confirmed, refund_received, refund_refused, random_gain ; économies réalisées = remboursements reçus uniquement.

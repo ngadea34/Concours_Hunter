@@ -143,4 +143,28 @@ export const api = {
   promotions: () => get<T.PromoBrief[]>('/promotions'),
   addPromotion: (b: Partial<T.PromoBrief> & { title: string }) => post<T.PromoBrief>('/promotions', b),
   patchPromotion: (id: number, b: Partial<T.PromoBrief>) => patch<T.PromoBrief>(`/promotions/${id}`, b),
+
+  // M14 Shop & Promo
+  shopDashboard: () => get<T.ShopDashboard>('/shop/dashboard'),
+  shopPrefs: () => get<T.ShopPrefs>('/shop/preferences'),
+  putShopPrefs: (b: Partial<T.ShopPrefs>) => put<T.ShopPrefs>('/shop/preferences', b),
+  shopCommand: (command: string) => post<T.ShopCommandResult>('/shop/command', { command }),
+  shopDiscover: () => post<Record<string, unknown>>('/shop/discover'),
+  shopAnalyze: (b: { text: string; url?: string; title?: string; save?: boolean }) =>
+    post<{ analysis: Record<string, unknown> } | T.ShopOffer>('/shop/analyze', b),
+  shopOffer: (id: number) => get<T.ShopOffer & { documents: T.ShopDoc[]; claims: T.ShopClaim[] }>(`/shop/promotions/${id}`),
+  patchShopOffer: (id: number, b: Record<string, unknown>) => patch<T.ShopOffer>(`/shop/promotions/${id}`, b),
+  addAvailability: (id: number, b: { retailer: string; level: string; store?: string; price_eur?: number; source?: string }) =>
+    post<T.ShopAvailability>(`/shop/promotions/${id}/availability`, b),
+  shopDocs: () => get<T.ShopDoc[]>('/shop/documents'),
+  addShopDoc: (b: { kind: string; data_url: string; promotion_id?: number; claim_id?: number }) => post<T.ShopDoc>('/shop/documents', b),
+  ocrShopDoc: (id: number, text?: string) => post<T.ShopDoc>(`/shop/documents/${id}/ocr`, text !== undefined ? { text } : {}),
+  patchShopDoc: (id: number, b: Record<string, unknown>) => patch<T.ShopDoc>(`/shop/documents/${id}`, b),
+  shopClaim: (id: number) => get<T.ShopClaim>(`/shop/claims/${id}`),
+  newShopClaim: (promotion_id: number) => post<T.ShopClaim>('/shop/claims', { promotion_id }),
+  shopClaimAction: (id: number, action: string, b?: Record<string, unknown>) => post<T.ShopClaim>(`/shop/claims/${id}/${action}`, b ?? {}),
+  shopPreview: (id: number) => post<{ claim: T.ShopClaim; preview: T.ShopPreview }>(`/shop/claims/${id}/preview`),
+  shopExpenses: (month?: string) => get<T.ShopMonth>('/shop/expenses', { month }),
+  shopHistory: () => get<T.ShopMonth[]>('/shop/expenses/history'),
+  shopGain: (b: { amount_eur: number; date?: string; note?: string }) => post<T.ShopMonth>('/shop/gains', b),
 };
