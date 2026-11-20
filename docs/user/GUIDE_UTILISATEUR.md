@@ -13,11 +13,11 @@ Ce que l'application fait : elle lit des pages publiques, analyse les règlement
    - **Participation automatique** : l'application peut soumettre seule un formulaire, uniquement si le règlement l'autorise clairement, sans CAPTCHA ni connexion. Décochée par défaut.
    - **Conservation des preuves** : l'application garde des captures d'écran de vos participations.
    - **Notifications par e-mail** : consentement enregistré, mais l'envoi d'e-mails n'est pas encore disponible dans cette version (notifications dans l'application uniquement).
-4. Ouvrez **Sources**. Le Démon du Jeu est en consultation assistée depuis la version 0.4 (voir 1 bis) : sa lecture automatique ne reprend qu'avec un accord écrit de l'éditeur.
+4. Ouvrez **Sources**. La source Le Démon du Jeu est **désactivée** à l'installation : lisez sa note puis activez-la si vous le souhaitez.
 5. Avant d'activer une source, lisez sa **note sur les CGU** (conditions générales d'utilisation du site). Si les CGU interdisent la collecte automatisée, ne l'activez pas.
 6. Activez ensuite les sources que vous acceptez. Le planificateur les parcourt automatiquement.
 
-Jeu-concours.biz, ToutGagner, Concours du Net (concours-du-net.com) et Le Démon du Jeu ne sont jamais lus automatiquement sans accord écrit de leur éditeur. Ils restent accessibles en consultation assistée (voir 1 bis).
+Jeu-concours.biz, ToutGagner et Concours du Net (concours-du-net.com) ne sont jamais lus automatiquement sans accord écrit de leur éditeur. Ils restent accessibles en consultation assistée (voir 1 bis).
 
 ## 1 bis. Votre agrégateur : surveiller les sites des marques
 
@@ -25,7 +25,7 @@ L'application ne dépend pas d'un seul site agrégateur. Dans **Sources**, la ru
 
 Dans le **Catalogue**, le filtre **Type de jeu** trie les concours comme sur les sites spécialisés : tirage au sort, instant gagnant, quiz, créatif (photo, recette…), réseaux sociaux. Le type n'est affiché que lorsqu'il est établi par le texte du concours.
 
-**Consultation assistée (Jeu-concours.biz, ToutGagner, Concours du Net, Le Démon du Jeu).** Leurs conditions d'utilisation interdisent la lecture automatique : l'application ne les lit pas. Dans **Sources**, rubrique « Consultation assistée », le bouton **Ouvrir le site** vous y emmène. Quand un concours vous plaît, suivez son lien vers le site de l'organisateur, puis cliquez sur **Ajouter cette page à Concours Hunter** dans l'extension (ou collez l'adresse dans « Importer des concours »). Le Démon du Jeu n'a pas de CGU, mais il appartient au même réseau que Jeu-concours.biz : par prudence, il est traité de la même façon.
+**Consultation assistée (Jeu-concours.biz, ToutGagner, Concours du Net).** Leurs conditions d'utilisation interdisent la lecture automatique : l'application ne les lit pas. Dans **Sources**, rubrique « Consultation assistée », le bouton **Ouvrir le site** vous y emmène. Quand un concours vous plaît, suivez son lien vers le site de l'organisateur, puis cliquez sur **Ajouter cette page à Concours Hunter** dans l'extension (ou collez l'adresse dans « Importer des concours »).
 
 Si un éditeur vous donne un accord écrit, saisissez-le dans **Réglages > Autorisations écrites des éditeurs** (site, date, référence) : la lecture automatique de ce site reprend, toujours dans le respect de son robots.txt.
 

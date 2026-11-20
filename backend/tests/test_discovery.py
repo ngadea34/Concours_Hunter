@@ -144,13 +144,9 @@ def test_lddj_connector_real_structure(db):
             return httpx.Response(200, text=LDDJ_LIST, headers={"content-type": "text/html; charset=utf-8"})
         return httpx.Response(404)
 
-    from app.admin.settings_service import update_settings
-
     s = Source(name="LDDJ", kind="aggregator:lddj", url="https://www.ledemondujeu.com/nouveaux-jeux-concours.html", trust=75)
     db.add(s)
     db.commit()
-    # lecture automatique seulement après autorisation écrite enregistrée (politique de sources, D18)
-    update_settings(db, {"written_authorizations": [{"domain": "ledemondujeu.com", "date": "2026-12-01", "reference": "Accord écrit de test"}]})
     job = run_scan(db, s, Fetcher(client=httpx.Client(transport=httpx.MockTransport(r))), max_enrich=5)
     assert job.status == "ok", job.error
     assert job.found == 2

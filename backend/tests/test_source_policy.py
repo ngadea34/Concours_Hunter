@@ -58,10 +58,10 @@ def test_categories_and_matrix(client):
     assert allowed == {1: True, 2: True, 3: True, 4: True, 5: True, 6: False, 7: False}
     doms = {m["domain"]: m for m in r["matrix"]}
     assert set(doms) == {"jeu-concours.biz", "toutgagner.com", "ledemondujeu.com", "concours-du-net.com"}
-    assert doms["ledemondujeu.com"]["automated_extraction"] is False  # même réseau que Jeu-concours.biz
+    assert doms["ledemondujeu.com"]["automated_extraction"] is True  # pas de clause ; maintenu par décision de l'utilisateur (D18)
     assert doms["jeu-concours.biz"]["automated_extraction"] is False
     refs = {x["domain"] for x in r["references"]}
-    assert refs == {"jeu-concours.biz", "toutgagner.com", "concours-du-net.com", "ledemondujeu.com"}  # consultation assistée + lien direct
+    assert refs == {"jeu-concours.biz", "toutgagner.com", "concours-du-net.com"}  # consultation assistée + lien direct
 
 
 def test_denied_site_never_fetched_but_explained(client, db):
@@ -208,15 +208,15 @@ def test_written_authorization_unlocks_only_with_reference(db, client):
     from app.admin.settings_service import update_settings
     from app.discovery.policy import denial_reason
 
-    url = "https://www.ledemondujeu.com/nouveaux-jeux-concours.html"
+    url = "https://www.toutgagner.com/jeux-concours/ajoutes-cette-semaine.html"
     assert denial_reason(url)
-    r = client.put("/api/settings", json={"written_authorizations": [{"domain": "ledemondujeu.com"}]})
+    r = client.put("/api/settings", json={"written_authorizations": [{"domain": "toutgagner.com"}]})
     assert r.status_code in (400, 422) and denial_reason(url)
     r = client.put("/api/settings", json={"written_authorizations": [{"domain": "exemple.fr", "reference": "accord oral"}]})
     assert r.status_code in (400, 422)
-    update_settings(db, {"written_authorizations": [{"domain": "ledemondujeu.com", "date": "2026-12-01", "reference": "E-mail de Reflexe Media du 01/12"}]})
+    update_settings(db, {"written_authorizations": [{"domain": "toutgagner.com", "date": "2026-12-01", "reference": "E-mail de l'éditeur du 01/12"}]})
     assert denial_reason(url) is None and denial_reason("https://www.jeu-concours.biz/") is not None
     m = {x["domain"]: x for x in client.get("/api/sources/policy").json()["matrix"]}
-    assert m["ledemondujeu.com"]["authorized_in_writing"] is True
+    assert m["toutgagner.com"]["authorized_in_writing"] is True
     update_settings(db, {"written_authorizations": []})
     assert denial_reason(url)

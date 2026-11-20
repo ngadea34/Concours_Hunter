@@ -27,11 +27,11 @@ Les clauses des CGU sont résumées avec leur URL (le texte intégral reste sur 
 | Flux RSS / Atom | Non | Non | Non | Non |
 | API publique | Non (JSON-LD de référencement) | Non | Non | Non |
 | Anti-robot visible | reCAPTCHA (formulaires) ; journalisation annoncée | reCAPTCHA (formulaires) | Blocage IP annoncé | Cloudflare Turnstile (formulaires) |
-| Catégorie d'un scan automatique | 6 | 6 (voir ci-dessous) | 6 | 6 |
-| Mode retenu dans Concours Hunter | Consultation assistée, lien direct, ajout de la page organisateur | Idem (connecteur prêt, réactivable par autorisation écrite) | Idem | Idem |
+| Catégorie d'un scan automatique | 6 | 1 (pas de clause ; voir ci-dessous) | 6 | 6 |
+| Mode retenu dans Concours Hunter | Consultation assistée, lien direct, ajout de la page organisateur | Source publique (listes publiques, robots.txt respecté), décision de Nico | Consultation assistée | Consultation assistée |
 | Pour aller plus loin | Accord écrit via le formulaire de contact (sans réponse = refus, selon les CGU) | Accord écrit de Reflexe Media (une demande couvre LDDJ et Jeu-concours.biz) | Accord écrit (rédaction) | Formulaire de contact, objet « Organisateur / partenariat » |
 
-**LDDJ.** Le site n'a pas de CGU écrites, mais il forme un réseau commercial unique avec Jeu-concours.biz : les deux pages « organisateurs » proposent une diffusion simultanée, avec le même contact commercial. Par ailleurs, une base de concours reste protégée par le droit des producteurs de bases de données (CPI L.341-1, L.342-1 et L.342-2), même sans clause : l'extraction répétée et systématique de parties non substantielles est interdite. La lecture automatique de LDDJ est donc suspendue (décision D18) jusqu'à un accord écrit, qui se saisit dans **Réglages > Autorisations écrites des éditeurs**. Le connecteur reste en place et testé.
+**LDDJ.** Le site n'a pas de CGU écrites, mais il forme un réseau commercial unique avec Jeu-concours.biz : les deux pages « organisateurs » proposent une diffusion simultanée, avec le même contact commercial. Par ailleurs, une base de concours reste protégée par le droit des producteurs de bases de données (CPI L.341-1, L.342-1 et L.342-2), même sans clause : l'extraction répétée et systématique de parties non substantielles est interdite. Une suspension par prudence a été proposée ; Nico a choisi de maintenir la lecture automatique (décision D18). Le connecteur lit seulement les listes publiques, à cadence réduite, respecte robots.txt et n'appelle jamais `/toconc.php`. Si l'éditeur s'y oppose, il suffit de désactiver la source.
 
 **Concours du Net.** `concoursdunet.com` n'existe pas et `concoursdunet.fr` est une page de parking. Le vrai site est `concours-du-net.com`.
 
@@ -89,7 +89,7 @@ Les clauses des CGU sont résumées avec leur URL (le texte intégral reste sur 
 - Aucune protection n'a été rencontrée ni contournée pendant l'audit.
 
 ## Ce que fait Concours Hunter
-1. **Aucun collecteur automatique** pour ces quatre sites sans accord écrit enregistré. Le planificateur ignore ces domaines même si une source est activée par erreur ; le récupérateur les refuse.
+1. **Aucun collecteur automatique** pour Jeu-concours.biz, ToutGagner et Concours du Net sans accord écrit enregistré (LDDJ : voir D18). Le planificateur ignore ces domaines même si une source est activée par erreur ; le récupérateur les refuse.
 2. **Consultation assistée** : page Sources, lien direct, explication. L'utilisateur ouvre le site lui-même.
 3. **Import par l'utilisateur** : il ajoute la page de l'organisateur (extension « Ajouter cette page », ou import d'adresses). Coller l'adresse d'une fiche d'agrégateur renvoie une explication au lieu de lire la fiche.
 4. **Sources primaires** : sites des organisateurs (sitemaps, flux RSS, pages concours) suivis depuis Sources, une fois par jour, dans le respect de robots.txt.

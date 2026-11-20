@@ -46,9 +46,9 @@ def organizer_guess(onclick: str | None, name: str | None) -> str | None:
 class LeDemonDuJeu(HtmlListingConnector):
     kind = "aggregator:lddj"
     description = "Le Démon du Jeu (LDDJ) : liste quotidienne des nouveaux concours."
-    tos_note = ("Audit du 2026-11-20 : pas de CGU écrites, mais même réseau que Jeu-concours.biz (Reflexe Media), dont les CGU interdisent "
-                "l'extraction. Lecture automatique suspendue tant qu'aucune autorisation écrite n'est enregistrée dans Réglages ; "
-                "le connecteur respecte robots.txt (/toconc.php jamais appelé).")
+    tos_note = ("Audit du 2026-11-20 : pas de CGU ni de clause anti-extraction ; robots.txt respecté (/toconc.php jamais appelé). "
+                "Même réseau commercial que Jeu-concours.biz (Reflexe Media), dont les CGU interdisent l'extraction : lecture maintenue "
+                "à votre demande, à cadence réduite. Désactivez la source si l'éditeur s'y oppose.")
     default_config = {"max_items": 200}
 
     def parse(self, html: str, base_url: str) -> tuple[list[RawContest], str | None]:

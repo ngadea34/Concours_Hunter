@@ -11,7 +11,7 @@ Ordre des directives de Nico (2026-11-20) : 1) M15 Programme de la semaine (fait
 | 1 Fondations | ✅ | `python -m app.cli serve` démarre ; UI servie sur :8765 |
 | 2 Base de données | ✅ | 30 tables (v4), migrations versionnées, WAL, sauvegarde/restauration testées |
 | 3 Découverte | ✅ (fixtures) | RSS, HTML générique, dédup, provenance — tests `test_discovery.py` |
-| 4 Agrégateurs | ✅ revu (v0.4) | Audit A à J du 2026-11-20 (AUDIT_AGREGATEURS.md) : les 4 sites en consultation assistée, aucune lecture automatique sans accord écrit (Réglages). LDDJ suspendu car même réseau que Jeu-concours.biz. Aucun RSS ni API |
+| 4 Agrégateurs | ✅ revu (v0.4) | Audit A à J du 2026-11-20 (AUDIT_AGREGATEURS.md) : Jeu-concours.biz, ToutGagner, Concours du Net en consultation assistée (accord écrit pour lever, Réglages) ; LDDJ lu automatiquement par décision de Nico (D18) malgré le même réseau que Jeu-concours.biz. Aucun RSS ni API |
 | 5 Intelligence | ✅ | règles R0 7 langues + Ollama R1/R2 optionnel avec citations vérifiées |
 | 6 Frontend | ✅ | 9 pages, vérifiées dans Chromium (bureau 1280px + mobile 390px, 0 erreur console) |
 | 7 Participation | ✅ | semi/manuel + auto encadré, testé sur formulaire de démo local (Playwright) |
@@ -54,7 +54,7 @@ Ordre des directives de Nico (2026-11-20) : 1) M15 Programme de la semaine (fait
 - Scheduler : chaque source isolée (try/except) ; un domaine en consultation assistée n'est jamais scanné.
 
 ## Reste à faire
-0. M14 Shop & Promo (voir ROADMAP). Demandes d'accord écrit (Reflexe Media pour LDDJ + Jeu-concours.biz, ToutGagner, Concours du Net) : démarche de Nico, contacts dans AUDIT_AGREGATEURS.md.
+0. M14 Shop & Promo (voir ROADMAP). Demandes d'accord écrit (Reflexe Media pour Jeu-concours.biz, ToutGagner, Concours du Net) : démarche de Nico, contacts dans AUDIT_AGREGATEURS.md.
 1. Faire grandir l'agrégateur maison : suivre les sites suggérés (Sources), et en ajouter à la main.
 2. Jeu-concours.biz : seulement avec autorisation écrite d'EKOJEU (démarche de Nico).
 3. Optionnel : notifications hors application (e-mail / ntfy), connecteur « pages gagnants ».

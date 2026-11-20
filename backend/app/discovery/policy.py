@@ -65,11 +65,11 @@ AGGREGATORS: dict[str, dict] = {
     },
     "ledemondujeu.com": {
         "name": "Le Démon du Jeu", "editor": "Reflexe Media",
-        "modes": ["assisted", "external_link", "browser_share"],
-        "automated_extraction": False, "category_of_scan": 6,
-        "reason": "Pas de CGU écrites, mais même réseau commercial que Jeu-concours.biz (contact Reflexe Media) dont les CGU interdisent l'extraction et les outils dérivés ; une base de concours reste protégée par le droit des producteurs de bases de données (CPI L.341-1 et L.342-2) même sans clause. Lecture automatique suspendue jusqu'à autorisation écrite.",
-        "how_to": "Consultez le site vous-même ; ouvrez la page de l'organisateur d'un concours qui vous plaît et ajoutez-la. Le connecteur reste prêt : il se réactive dès qu'une autorisation écrite est enregistrée dans Réglages.",
-        "unlock": "Autorisation écrite de Reflexe Media, une seule demande pour Le Démon du Jeu et Jeu-concours.biz (formulaire de contact ; sans réponse, c'est un refus).",
+        "modes": ["public_source", "external_link", "browser_share"],
+        "automated_extraction": True, "category_of_scan": 1,
+        "reason": "Pas de CGU ni de clause anti-extraction ; robots.txt interdit /toconc.php, jamais demandé. Même réseau commercial que Jeu-concours.biz (Reflexe Media) : lecture automatique maintenue par décision de l'utilisateur (D18), à cadence réduite.",
+        "how_to": "Source activable dans Sources (listes publiques uniquement, une requête toutes les 5 s au plus, jamais /toconc.php).",
+        "unlock": None,
         "home": "https://www.ledemondujeu.com/",
     },
     "concours-du-net.com": {
