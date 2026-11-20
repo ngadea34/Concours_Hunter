@@ -19,6 +19,14 @@ Ce que l'application fait : elle lit des pages publiques, analyse les règlement
 
 Jeu-concours.biz et ToutGagner sont exclus : leurs conditions d'utilisation interdisent la collecte automatique ou réservent le contenu aux abonnés. Concours du Net n'existe plus. Le robot ne suit jamais le lien « Voir le concours » de Le Démon du Jeu (interdit par son robots.txt) : vous pouvez, vous, cliquer dessus depuis la fiche.
 
+## 1 bis. Votre agrégateur : surveiller les sites des marques
+
+L'application ne dépend pas d'un seul site agrégateur. Dans **Sources**, la rubrique **« Sites d'organisateurs à surveiller »** liste les marques et médias dont elle a déjà trouvé des concours. Cliquez sur **Surveiller** : une fois par jour, l'application lira les pages de jeux publiées par ce site (son plan du site, son flux RSS ou sa page concours), dans le respect de son fichier robots.txt, et ajoutera ses nouveaux concours au catalogue. Vous pouvez aussi saisir un nom de domaine (ex. `marque.fr`).
+
+Dans le **Catalogue**, le filtre **Type de jeu** trie les concours comme sur les sites spécialisés : tirage au sort, instant gagnant, quiz, créatif (photo, recette…), réseaux sociaux. Le type n'est affiché que lorsqu'il est établi par le texte du concours.
+
+Jeu-concours.biz et ToutGagner ne sont pas lus par l'application : leurs conditions d'utilisation l'interdisent. Vous pouvez les consulter vous-même et ajouter un concours qui vous intéresse avec l'extension, depuis la page de l'organisateur.
+
 ## 2. Le cycle d'un concours
 
 Chaque concours suit ce parcours :

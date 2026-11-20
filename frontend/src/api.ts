@@ -98,9 +98,11 @@ export const api = {
   readNotification: (id: number) => post<{ ok: boolean }>(`/notifications/${id}/read`),
   readAllNotifications: () => post<{ ok: boolean }>('/notifications/read-all'),
   sources: () => get<T.Source[]>('/sources'),
-  addSource: (b: { name: string; kind: 'rss' | 'html'; url: string; language?: string; country?: string }) =>
+  addSource: (b: { name: string; kind: 'rss' | 'html' | 'site'; url: string; language?: string; country?: string }) =>
     post<T.Source>('/sources', b),
   patchSource: (id: number, b: { enabled?: boolean; name?: string }) => patch<T.Source>(`/sources/${id}`, b),
+  siteSuggestions: () => get<T.SiteSuggestion[]>('/sources/suggestions'),
+  followSite: (domain: string) => post<T.Source>('/sources/follow', { domain }),
   scanSource: (id: number) => post<T.ScanJob>(`/sources/${id}/scan`),
   scanJobs: () => get<T.ScanJob[]>('/scan-jobs'),
   profile: () => get<T.Profile>('/profile'),

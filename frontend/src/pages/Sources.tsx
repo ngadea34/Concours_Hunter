@@ -13,6 +13,8 @@ export function Sources() {
   const toast = useToast();
   const src = useAsync(() => api.sources(), []);
   const jobs = useAsync(() => api.scanJobs(), []);
+  const sug = useAsync(() => api.siteSuggestions(), []);
+  const [domain, setDomain] = useState('');
   const [name, setName] = useState('');
   const [kind, setKind] = useState<'rss' | 'html'>('rss');
   const [url, setUrl] = useState('');
@@ -21,7 +23,7 @@ export function Sources() {
   const [busy, setBusy] = useState(false);
 
   const act = async (fn: () => Promise<unknown>, msg: string) => {
-    try { await fn(); toast.ok(msg); src.reload(); jobs.reload(); } catch (e) { toast.err(e); }
+    try { await fn(); toast.ok(msg); src.reload(); jobs.reload(); sug.reload(); } catch (e) { toast.err(e); }
   };
   const add = async (e: FormEvent) => {
     e.preventDefault();
@@ -71,6 +73,33 @@ export function Sources() {
           </div>
         )}
       </Async>
+
+      <section className="card">
+        <h2>{t('src.sugTitle')}</h2>
+        <p className="muted small">{t('src.sugHelp')}</p>
+        <Async state={sug} isEmpty={(l) => l.length === 0} empty={t('src.sugNone')}>
+          {(l) => (
+            <ul className="list">
+              {l.map((x) => (
+                <li key={x.domain} className="row between wrap gap">
+                  <div>
+                    <strong>{x.domain}</strong> <span className="muted small">· {x.contests} {t('src.sugCount')}</span>
+                    {x.examples.length > 0 && <div className="small muted">{x.examples.join(' · ')}</div>}
+                  </div>
+                  <button className="btn" onClick={() => act(() => api.followSite(x.domain), t('src.followed'))}>
+                    {t('src.follow')}<span className="sr-only"> {x.domain}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Async>
+        <form className="row gap wrap" onSubmit={(e) => { e.preventDefault(); act(() => api.followSite(domain.trim()), t('src.followed')).then(() => setDomain('')); }}>
+          <div className="field"><label htmlFor="sd">{t('src.addSite')}</label>
+            <input id="sd" required value={domain} onChange={(e) => setDomain(e.target.value)} placeholder={t('src.domain')} /></div>
+          <div className="field"><button className="btn btn-primary">{t('src.follow')}</button></div>
+        </form>
+      </section>
 
       <section className="card">
         <h2>{t('src.add')}</h2>

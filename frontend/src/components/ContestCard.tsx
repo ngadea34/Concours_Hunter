@@ -15,6 +15,7 @@ export function ContestBadges({ c }: { c: ContestSummary }) {
       <Badge tone="info">{t(`status.${c.status}`)}</Badge>
       <Badge tone={freeTone[c.free_status]}>{t(`free.${c.free_status}`)}</Badge>
       <Badge tone={eligTone[c.fr_eligible]}>{t(`elig.${c.fr_eligible}`)}</Badge>
+      {c.game_type && <Badge>{t(`game.${c.game_type}`)}</Badge>}
       {c.category && <Badge>{t(`prize.${c.category}`)}</Badge>}
       {c.participated && <Badge tone="info">{t('cat.participated')}</Badge>}
     </div>

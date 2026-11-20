@@ -66,7 +66,7 @@ SORTS = {"end_date": Contest.end_date.asc().nulls_last(), "-interest": Contest.i
 
 
 @router.get("/contests")
-def list_contests(q: str | None = None, status: str | None = None, category: str | None = None, free_status: str | None = None,
+def list_contests(q: str | None = None, status: str | None = None, category: str | None = None, game_type: str | None = None, free_status: str | None = None,
                   fr_eligible: str | None = None, closing_within_days: int | None = None, min_reliability: int | None = None,
                   sort: str = "-interest", page: int = Query(1, ge=1), page_size: int = Query(24, ge=1, le=100), db: Session = Depends(get_db)) -> dict:
     stmt = select(Contest).where(Contest.merged_into_id.is_(None))
@@ -79,6 +79,8 @@ def list_contests(q: str | None = None, status: str | None = None, category: str
         stmt = stmt.where(Contest.status.not_in(("rejected", "expired", "archived")))
     if category:
         stmt = stmt.where(Contest.category == category)
+    if game_type:
+        stmt = stmt.where(Contest.game_type == game_type)
     if free_status:
         stmt = stmt.where(Contest.free_status == free_status)
     if fr_eligible:
@@ -413,6 +415,34 @@ def new_source(body: NewSource, db: Session = Depends(get_db)) -> dict:
     s = Source(name=body.name, kind=body.kind, url=body.url, language=body.language, country=body.country, config=body.config or {}, tos_note=cls.tos_note)
     db.add(s)
     audit(db, "user", "source_add", name=body.name, kind=body.kind)
+    db.commit()
+    return _source_out(db, s)
+
+
+@router.get("/sources/suggestions")
+def source_suggestions(db: Session = Depends(get_db)) -> list[dict]:
+    from ..discovery.suggest import suggestions
+
+    return suggestions(db)
+
+
+class Follow(BaseModel):
+    domain: str = Field(max_length=253)
+
+
+@router.post("/sources/follow")
+def follow_site(body: Follow, db: Session = Depends(get_db)) -> dict:
+    from ..discovery.suggest import follow
+
+    try:
+        s = follow(db, body.domain)
+    except PermissionError as e:
+        raise HTTPException(409, f"Site exclu : {e}") from e
+    except FileExistsError as e:
+        raise HTTPException(409, str(e)) from e
+    except ValueError as e:
+        raise HTTPException(400, str(e)) from e
+    audit(db, "user", "source_follow", domain=s.name)
     db.commit()
     return _source_out(db, s)
 

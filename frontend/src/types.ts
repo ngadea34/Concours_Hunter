@@ -17,11 +17,13 @@ export const PRIZE_CATEGORIES: PrizeCategory[] = [
   'high_tech', 'auto', 'travel', 'home', 'voucher', 'product', 'culture',
   'leisure', 'experience', 'show', 'restaurant', 'cash', 'other',
 ];
+export type GameType = 'instant_win' | 'creative' | 'quiz' | 'social' | 'draw';
+export const GAME_TYPES: GameType[] = ['draw', 'instant_win', 'quiz', 'creative', 'social'];
 export const CLAIM_STATUSES: ClaimStatus[] = ['to_claim', 'claimed', 'received', 'expired', 'refused'];
 
 export interface ContestSummary {
   id: number; title: string; url: string; organizer_name: string | null; source_names: string[];
-  status: ContestStatus; category: PrizeCategory | null; prize_summary: string | null;
+  status: ContestStatus; category: PrizeCategory | null; game_type: GameType | null; prize_summary: string | null;
   total_prize_value_eur: number | null; end_date: string | null; days_left: number | null;
   language: string | null; countries_allowed: string[]; reliability_score: number | null;
   interest_score: number | null; free_status: FreeStatus; fr_eligible: TriState;
@@ -63,6 +65,7 @@ export interface Source {
   id: number; name: string; kind: string; url: string; enabled: boolean; language: string | null; country: string | null;
   last_scan_at: string | null; last_status: string | null; contests_found: number; tos_note: string | null;
 }
+export interface SiteSuggestion { domain: string; contests: number; organizer_names: string[]; examples: string[] }
 export interface ScanJob {
   id: number; source_id: number | null; source_name: string | null; status: string; started_at: string;
   finished_at: string | null; found: number; new: number; error: string | null;
@@ -98,6 +101,6 @@ export interface Diagnostics {
 }
 export interface AuditLog { ts: string; actor: string; action: string; detail: string }
 export interface ContestQuery {
-  q?: string; status?: string; category?: string; free_status?: string; fr_eligible?: string;
+  q?: string; status?: string; category?: string; game_type?: string; free_status?: string; fr_eligible?: string;
   closing_within_days?: number; min_reliability?: number; sort?: string; page?: number; page_size?: number;
 }

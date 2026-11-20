@@ -10,7 +10,7 @@ from datetime import date
 
 from ..i18n.geo import CURRENCY_SYMBOLS, MONTHS, find_countries, norm, region_includes_fr
 
-ANALYZER_VERSION = "r0-1.0"
+ANALYZER_VERSION = "r0-1.1"  # à incrémenter à chaque changement des règles : invalide le cache
 
 
 @dataclass
