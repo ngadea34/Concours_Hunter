@@ -123,13 +123,13 @@ L'IA locale aide à lire les règlements ambigus. Elle est facultative : sans el
 2. Téléchargez les modèles (commandes standard d'Ollama) :
 
 ```powershell
-ollama pull qwen2.5:3b
-ollama pull qwen2.5:7b
+ollama pull qwen3.5:4b
+ollama pull qwen3:8b
 ```
 
 3. Dans l'application, ouvrez **Réglages**, section **IA locale (Ollama)**, et cochez **Activer l'IA locale**.
 
-Les modèles par défaut sont `qwen2.5:3b` (petit modèle) et `qwen2.5:7b` (grand modèle). L'adresse d'Ollama doit rester sur votre ordinateur (`http://127.0.0.1:11434`).
+Les modèles par défaut sont `qwen3.5:4b` (petit modèle) et `qwen3:8b` (grand modèle). L'adresse d'Ollama doit rester sur votre ordinateur (`http://127.0.0.1:11434`).
 
 ## 9. Dépannage
 

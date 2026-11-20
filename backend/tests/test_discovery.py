@@ -43,7 +43,8 @@ def fetcher():
 
 
 def test_aggregator_scan_end_to_end(db):
-    s = Source(name="Agg", kind="aggregator:lddj", url="https://agg.test/", enabled=True, trust=70)
+    s = Source(name="Agg", kind="html", url="https://agg.test/", enabled=True, trust=70,
+               config={"item": "article.concours", "title": "h2", "end_date": ".date", "prize": ".lot", "max_pages": 1})
     db.add(s)
     db.commit()
     job = run_scan(db, s, fetcher())
@@ -111,3 +112,70 @@ def test_rss_connector(db):
     db.commit()
     job = run_scan(db, s, Fetcher(client=httpx.Client(transport=httpx.MockTransport(r))), max_enrich=0)
     assert job.status == "ok" and job.new == 1 and s.etag == "abc"
+
+
+LDDJ_LIST = """<html><body>
+<article class="bloc-article ombre" id="article-concours-id-382789">
+ <h3 class="bloc-article-titre"><a href="jeux-concours-moulinex.fr.html" data-concours-nom="moulinex.fr">moulinex.fr</a></h3>
+ <span class="bloc-article-dates"><strong>Clôture le 22/11/2099</strong></span>
+ <span class="bloc-article-dates-ajout">Ajouté le 20/11/2026</span>
+ <ul><li class="bloc-article-pictos-item"><img alt="Tirage au sort" src="x.png"></li></ul>
+ <div class="bloc-article-no"><a href="jeu-moulinex.fr-gagnez-aspirateurs-22-novembre-2099.php">382789</a></div>
+ <h4 class="bloc-article-text-titre">Cadeaux à gagner</h4><p class="bloc-article-text-text">3 aspirateurs Moulinex (599€)</p>
+ <h4 class="bloc-article-text-titre">Principe</h4><p class="bloc-article-text-text">Remplir le formulaire.</p>
+ <h4 class="bloc-article-text-titre">Conditions</h4><p class="bloc-article-text-text">France métropolitaine, majeurs.</p>
+ <a class="toolbar-link sansdegrade" href="toconc.php?c=382789" rel="nofollow" target="_blank" onclick="_gaq.push(['_trackEvent','moulinex.fr','/votre-jeu.moulinex.fr/quiz/noel',''])">VOIR LE CONCOURS</a>
+</article>
+<article class="bloc-article ombre"><h3 class="bloc-article-titre"><a data-concours-nom="evil.test">evil.test</a></h3>
+ <div class="bloc-article-no"><a href="jeu-evil.php">1</a></div>
+ <a class="toolbar-link" href="toconc.php?c=1" onclick="_gaq.push(['_trackEvent','evil.test','/autre-domaine.com/x',''])">VOIR</a></article>
+</body></html>"""
+
+
+def test_lddj_connector_real_structure(db):
+    calls = []
+
+    def r(req):
+        u = str(req.url)
+        calls.append(u)
+        if u.endswith("/robots.txt"):
+            return httpx.Response(200, text="User-agent: *\nDisallow: /toconc.php\n")
+        if u.endswith("/nouveaux-jeux-concours.html"):
+            return httpx.Response(200, text=LDDJ_LIST, headers={"content-type": "text/html; charset=utf-8"})
+        return httpx.Response(404)
+
+    s = Source(name="LDDJ", kind="aggregator:lddj", url="https://www.ledemondujeu.com/nouveaux-jeux-concours.html", trust=75)
+    db.add(s)
+    db.commit()
+    job = run_scan(db, s, Fetcher(client=httpx.Client(transport=httpx.MockTransport(r))), max_enrich=5)
+    assert job.status == "ok", job.error
+    assert job.found == 2
+    c = db.query(Contest).filter(Contest.title.like("moulinex%")).one()
+    assert c.url == "https://votre-jeu.moulinex.fr/quiz/noel"  # URL organisateur déduite, sans passer par toconc.php
+    assert str(c.end_date) == "2099-11-22" and c.entry_method == "form"
+    assert c.sightings[0].source_url.endswith("jeu-moulinex.fr-gagnez-aspirateurs-22-novembre-2099.php")
+    evil = db.query(Contest).filter(Contest.title.like("evil%")).one()
+    assert "ledemondujeu.com" in evil.url  # hôte incohérent avec l'organisateur : pas de devinette
+    assert not any("toconc.php" in u for u in calls)  # robots.txt respecté
+
+
+def test_denied_sites(client, db):
+    r = client.post("/api/sources", json={"name": "JCB", "kind": "html", "url": "https://www.jeu-concours.biz/"})
+    assert r.status_code == 409
+    try:
+        fetcher().get("https://www.toutgagner.com/x")
+        raise AssertionError("doit être bloqué")
+    except FetchBlocked as e:
+        assert "exclu" in str(e)
+
+
+def test_seed_retires_excluded_sources(db):
+    from app.seed import seed
+
+    db.add(Source(name="JCB", kind="aggregator:jeu-concours-biz", url="https://www.jeu-concours.biz/", enabled=True))
+    db.add(Source(name="LDDJ", kind="aggregator:lddj", url="https://www.ledemondujeu.com/"))
+    db.commit()
+    seed(db)
+    jcb = db.query(Source).filter_by(kind="aggregator:jeu-concours-biz").one()
+    assert not jcb.enabled and "Exclu" in jcb.last_status
+    assert db.query(Source).filter_by(kind="aggregator:lddj").one().url.endswith("nouveaux-jeux-concours.html")

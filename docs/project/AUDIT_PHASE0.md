@@ -35,10 +35,14 @@
 
 ## 4. Modèles IA du produit (à l'exécution chez Nico, 0 €/mois)
 - Couche 0 : règles déterministes (regex multilingues, listes de pays, motifs d'achat) — toujours active.
-- Couche 1 : petit modèle Ollama local (ex. `qwen2.5:3b`) — optionnel.
-- Couche 2 : modèle Ollama moyen (ex. `qwen2.5:7b` / `llama3.1:8b`) — optionnel, seulement si la couche 1 échoue.
+- Couche 1 : petit modèle Ollama local (ex. `qwen3.5:4b`) — optionnel.
+- Couche 2 : modèle Ollama moyen (ex. `qwen3:8b` / `llama3.1:8b`) — optionnel, seulement si la couche 1 échoue.
 - Aucune API payante. Si Ollama est absent, le produit fonctionne en mode règles seules (les cas ambigus partent en vérification humaine).
 
 ## 5. Conclusions
 - Stack de référence retenue (Python/FastAPI/SQLite/SQLAlchemy/React/TS/APScheduler/Playwright/MV3), sans Docker, sans Scrapy (httpx + BeautifulSoup suffisent, Scrapy n'apporte rien au volume visé).
 - Limitation majeure : sites agrégateurs inaccessibles depuis le cloud → connecteurs livrés et testés sur fixtures, validation réelle à faire sur le poste.
+
+## Addendum 2026-11-20 — PC de Nico (mesuré)
+Windows 10 Famille 19045 · i9-9900 (8c/16t) · 64 Go RAM · RTX 2060 SUPER 8 Go · 506 Go libres sur C: · Python 3.11/3.12/3.14 · Node 26 · Git 2.55.
+Ollama : qwen3:30b-a3b, qwen3:14b, qwen3.5:9b, qwen3:8b, qwen3.5:4b. Recommandation : R1 = qwen3.5:4b, R2 = qwen3:8b (tiennent dans les 8 Go de VRAM).
