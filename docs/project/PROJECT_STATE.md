@@ -31,6 +31,10 @@ Dépôt : https://github.com/ngadea34/concours_hunter — `main` = phase 0 ; bra
 - Sources `site` scannées une fois par jour (config `interval_minutes` pour changer).
 - Type de jeu `game_type` (migration v2 avec classement des concours existants), filtre catalogue et badge.
 
+## Essai réel des sites d'organisateurs (PC de Nico, 2026-11-20)
+- Migration v2 OK (sauvegarde auto), 46/46 tests (après avoir pointé PLAYWRIGHT_BROWSERS_PATH ; corrigé en 0.2.1).
+- 15 sites suggérés depuis les 128 concours. 5 suivis et scannés en 8 min 47 : ici.fr 2 concours, leclub-bricolage.fr 1 (page de liste, corrigé), lillelanuit.com 5 (URL remplacée par une playlist Deezer, corrigé), arte.tv refusé par robots.txt (correct), francetelevisions.fr 0 (sitemap en www ignoré, corrigé).
+
 ## Reste à faire
 1. Faire grandir l'agrégateur maison : suivre les sites suggérés (Sources), et en ajouter à la main.
 2. Jeu-concours.biz : seulement avec autorisation écrite d'EKOJEU (démarche de Nico).

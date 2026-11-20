@@ -29,6 +29,9 @@ from .service import add_proof, mark, prefill
 log = logging.getLogger(__name__)
 EXT = ROOT / "extension"
 CHROMIUM_FALLBACK = "/opt/pw-browsers/chromium"
+# Navigateurs installés dans le dossier de l'appli (.playwright-browsers) : utilisés même si la variable n'est pas définie
+if not os.environ.get("PLAYWRIGHT_BROWSERS_PATH") and (ROOT / ".playwright-browsers").is_dir():
+    os.environ["PLAYWRIGHT_BROWSERS_PATH"] = str(ROOT / ".playwright-browsers")
 
 
 def _scripts() -> str:

@@ -153,3 +153,82 @@ def test_migration_v2_backfills_game_type(db):
     assert migrate() == LATEST
     with get_engine().begin() as conn:
         assert conn.execute(text("SELECT game_type FROM contests")).scalar() == "instant_win"
+
+
+SALLE = """<html><body><h2>Nos jeux</h2>
+<div class="jeu"><a href="/jeux-concours/places-concert-opus">2x 2 places Opus Kink jusqu'au 27 Nov 2099 Je joue !</a></div>
+<div class="jeu"><a href="/jeux-concours/invitations-impro">2x 2 invitations Match Impro jusqu'au 24 Nov 2099 Je joue !</a></div>
+<a href="/nos-jeux-concours-c.html">Tous nos jeux concours en cours</a>
+<footer>Suivez-nous sur Facebook et Instagram, partagez !</footer></body></html>"""
+JEU = """<html><body><h1>Places Opus Kink</h1><p>Jeu gratuit sans obligation d'achat, tirage au sort.</p>
+<a href="https://www.deezer.com/fr/playlist/1">Écouter la playlist</a><a href="https://agenda.test/play">Play</a>
+<footer>Suivez-nous sur Facebook Instagram Partager</footer></body></html>"""
+
+
+def salle_router(req: httpx.Request) -> httpx.Response:
+    u = str(req.url)
+    if u == "https://salle.test/robots.txt":  # sitemap déclaré sur www : même site
+        return httpx.Response(200, text="User-agent: *\nSitemap: https://www.salle.test/sitemap.xml\n")
+    if u == "https://www.salle.test/sitemap.xml":
+        return httpx.Response(200, headers=XML, text='<?xml version="1.0"?><urlset><url><loc>https://www.salle.test/agenda</loc></url></urlset>')
+    if u == "https://salle.test/":
+        return httpx.Response(200, text=SALLE, headers=HTML)
+    if u.startswith("https://salle.test/jeux-concours/"):
+        return httpx.Response(200, text=JEU, headers=HTML)
+    return httpx.Response(404)
+
+
+def test_site_real_world_pitfalls(db):
+    """Cas vus lors de l'essai réel : lien externe pris pour le jeu, bouton « Je joue ! » dans le titre,
+    page de liste prise pour un concours, faux « réseaux sociaux » à cause du pied de page, scan vide silencieux."""
+    s = Source(name="salle.test", kind="site", url="https://salle.test/", enabled=True)
+    db.add(s)
+    db.commit()
+    f = Fetcher(max_per_hour=100, client=httpx.Client(transport=httpx.MockTransport(salle_router), follow_redirects=True))
+    job = run_scan(db, s, f)
+    assert job.status == "ok", job.error
+    cs = sorted(db.query(Contest), key=lambda c: c.url)
+    assert [c.url for c in cs] == ["https://salle.test/jeux-concours/invitations-impro", "https://salle.test/jeux-concours/places-concert-opus"]
+    assert all(not c.title.lower().endswith("je joue !") for c in cs)
+    assert all(c.game_type == "draw" for c in cs)
+    assert "2 page(s)" in s.last_status
+
+    empty = Source(name="vide.test", kind="site", url="https://vide.test/", enabled=True)
+    db.add(empty)
+    db.commit()
+    run_scan(db, empty, Fetcher(client=httpx.Client(transport=httpx.MockTransport(lambda r: httpx.Response(200, text="<html></html>", headers=HTML) if r.url.path == "/" else httpx.Response(404)))))
+    assert "aucune page de jeu" in empty.last_status
+
+
+def test_listing_suffix_is_not_a_contest():
+    assert not is_contest_url("https://www.leclub-bricolage.fr/jeux-concours-c.html")
+    assert not is_contest_url("https://m.test/nos-jeux-concours")
+    assert is_contest_url("https://m.test/jeux-concours/gagnez-un-perceuse")
+
+
+def test_migration_v3_repairs_site_contests(db):
+    from sqlalchemy import text
+
+    from app.db.migrations import migrate
+    from app.db.models import ContestSighting
+    from app.db.session import get_engine
+
+    s = Source(name="salle.test", kind="site", url="https://salle.test/")
+    db.add(s)
+    db.flush()
+    for url, page in [("https://www.deezer.com/fr/playlist/1", "https://salle.test/jeux-concours/opus"),
+                      ("https://salle.test/jeux-concours-c.html", "https://salle.test/jeux-concours-c.html")]:
+        c = Contest(title="Suivez-nous sur Facebook Instagram partager " + page[-8:], url=url, canonical_url=url, fingerprint=page,
+                    status="new", game_type="social")
+        db.add(c)
+        db.flush()
+        db.add(ContestSighting(contest_id=c.id, source_id=s.id, source_url=page))
+    db.commit()
+    db.close()
+    with get_engine().begin() as conn:
+        conn.execute(text("DELETE FROM schema_version WHERE version >= 3"))
+    migrate()
+    with get_engine().begin() as conn:
+        rows = conn.execute(text("SELECT url, status, game_type FROM contests ORDER BY id")).all()
+    assert rows[0] == ("https://salle.test/jeux-concours/opus", "new", None)
+    assert rows[1][1] == "archived"
